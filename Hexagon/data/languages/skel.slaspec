@@ -1,0 +1,591 @@
+# sleigh specification file for Skeleton Processor
+#   >> see docs/languages/sleigh.htm or sleigh.pdf for Sleigh syntax
+# Other language modules (see Ghidra/Processors) may provide better examples
+# when creating a new language module.
+
+define endian=little;
+define alignment=4;
+
+define space ram     type=ram_space      size=4 wordsize=1 default;
+define space register type=register_space size=4;
+
+define token instr (32)
+   iclass     = (28,31)
+
+   imm_25_27 = (25, 27)
+
+   imm_24_27 = (24, 27)
+
+   imm_23_24 = (23, 24)
+
+   imm_22_27 = (22, 27)
+   imm_22_23 = (22, 23)
+
+   imm_21_27 = (21, 27)
+   imm_21_22 = (21, 22)
+   imm_21 = (21, 21)
+
+   imm_20_27 = (20, 27)
+
+   imm_18_19 = (18, 19)
+
+   imm_16_27 = (16, 27)
+   imm_16_25 = (16, 25)
+   imm_16_24 = (16, 24)
+   imm_16_23 = (16, 23)
+   imm_16_20 = (16, 20)
+
+   imm_13 = (13, 13)
+   imm_12 = (12, 12)
+
+   imm_11_13 = (11, 13)
+   imm_11_12 = (11, 12)
+   imm_11 = (11, 11)
+
+   imm_10_13 = (10, 13)
+   imm_10_12 = (10, 12)
+   imm_10 = (10, 10)
+
+   imm_8_12 = (8, 12)
+
+   imm_7_13 = (7, 13)
+   imm_7_12 = (7, 12)
+   imm_7 = (7, 7)
+
+   imm_5_13 = (5, 13)
+   imm_5_12 = (5, 12)
+   imm_5_9 = (5, 9)
+   imm_5_7 = (5, 7)
+   imm_5_6 = (5, 6)
+
+   imm_4 = (4, 4)
+
+   imm_3_12 = (3, 12)
+   imm_3_4 = (3, 4)
+
+   imm_2_12 = (2, 12)
+   imm_2_4 = (2, 4)
+   imm_2_3 = (2, 3)
+   imm_2 = (2, 2)
+
+   imm_1_13 = (1, 13)
+   imm_1_7 = (1, 7)
+
+   imm_0_13 = (0, 13)
+   imm_0_10 = (0, 10)
+   imm_0_9 = (0, 9)
+   imm_0_7 = (0, 7)
+   imm_0_6 = (0, 6)
+   imm_0_2 = (0, 2)
+   imm_0_1 = (0, 1)
+   imm_0 = (0, 0)
+   
+
+   S2 = (16,17)
+   T2 = (8,9)
+   D2 = (0,1)
+   
+   
+   Rs = (27, 27)
+   MajOp = (24,26)
+   D7 = (0,7)
+   D5 = (0,4)
+   D5_ctrl = (0,4)
+   S5 = (16,20)
+   S5_ctrl = (16,20)
+   alu_X5 = (16,20)
+   U2 = (8,9)
+   
+   parse = (14, 15)
+  	imm32 = (0, 31)
+;
+
+define register offset=0x00 size=4 [ 
+X0 
+X1 
+X2 
+X3 
+X4 
+X5 
+X6 
+X7 
+X8 
+X9 
+X10 
+X11 
+X12 
+X13 
+X14 
+X15 
+X16 
+X17 
+X18 
+X19 
+X20 
+X21 
+X22 
+X23 
+X24 
+X25 
+X26 
+X27 
+X28 
+SP
+FP
+LR
+ ];
+
+attach variables [ D5 S5 alu_X5 ] [
+X0 
+X1 
+X2 
+X3 
+X4 
+X5 
+X6 
+X7 
+X8 
+X9 
+X10 
+X11 
+X12 
+X13 
+X14 
+X15 
+X16 
+X17 
+X18 
+X19 
+X20 
+X21 
+X22 
+X23 
+X24 
+X25 
+X26 
+X27 
+X28 
+SP
+FP
+LR
+];
+
+
+ define register offset=0x80 size=4 [ 
+SA0
+LC0
+SA1
+LC1
+P30
+Reserve_5
+M0
+M1
+USR
+PC
+UGP
+GP
+CS0
+CS1
+UPCYCLELO
+UPCYCLEHI
+
+Reserved_16
+Reserved_17
+Reserved_18
+Reserved_19
+Reserved_20
+Reserved_21
+Reserved_22
+Reserved_23
+Reserved_24
+Reserved_25
+Reserved_26
+Reserved_27
+Reserved_28
+Reserved_29
+Reserved_30
+Reserved_31
+ ];
+
+ 
+ attach variables [ D5_ctrl S5_ctrl ] [
+ SA0
+LC0
+SA1
+LC1
+P30
+Reserve_5
+M0
+M1
+USR
+PC
+UGP
+GP
+CS0
+CS1
+UPCYCLELO
+UPCYCLEHI
+
+Reserved_16
+Reserved_17
+Reserved_18
+Reserved_19
+Reserved_20
+Reserved_21
+Reserved_22
+Reserved_23
+Reserved_24
+Reserved_25
+Reserved_26
+Reserved_27
+Reserved_28
+Reserved_29
+Reserved_30
+Reserved_31
+];
+
+define register offset=0x100 size=4 [ 
+P0
+P1
+P2
+P3
+];
+attach variables [ U2 ] [
+P0
+P1
+P2
+P3
+];
+
+
+
+#macro bse(out,v0,bits) {
+#	out = (v0 << bits);
+#	out = out s>> bits;
+#}
+
+
+Addr32i:  is    imm_16_24 & imm_1_13 {
+
+
+	local loc:4 = (((imm_16_24 << 13) | (imm_1_13)) << 2);
+	local loc1:3 = loc:3;
+	local loc2:4 = sext(loc1);
+
+	local loc3:4 = loc2 + inst_start;
+ export *:4 loc3;
+  }
+
+
+
+ define pcodeop _stub;
+
+ 
+# Add
+ADD_S16: is imm_21_27 & imm_5_13 {
+	local loc:2 = ((imm_21_27 << 9) | (imm_5_13));
+	local loc1:4 = sext(loc);
+    export loc1;
+}
+ADD_S16p: ADD_S16 is ADD_S16  {
+    export ADD_S16;
+}
+
+slot:D5" = add("S5",#"ADD_S16p")" is iclass=0b1011 & S5 & D5 & ADD_S16p {
+    D5 = S5 + ADD_S16p;
+} 
+ 
+ # alu32
+ with slot: iclass=0b0111 {
+
+
+
+
+	:"nop" is imm_24_27=0b1111 & imm_16_23  & imm_0_13 {}
+
+  
+  
+  	# Transfer imm
+  	
+	ImmU16: v is    imm_22_23 & imm_0_13  [ v = (imm_22_23 << 13) | (imm_0_13); ] {
+		local v1:4 = v;
+	 	export v1;
+	  }
+	  
+  	TI_S16: v is    imm_22_23 & imm_16_20 & imm_5_13  [ v = (imm_5_13) | (imm_16_20 << 9) | (imm_22_23 << 14); ] {
+		local v1:4 = v;
+	 	export v1;
+	  }
+	  
+ 
+	:alu_X5^".L" = ImmU16 is Rs = 0 & MajOp = 0b001 & imm_21=1 & alu_X5 & ImmU16 {
+		local tmp:4 = alu_X5 & 0xFFFF0000;
+		alu_X5 = tmp | ImmU16;
+	}
+	
+	:alu_X5^".H" = ImmU16 is Rs = 0 & MajOp = 0b010 & imm_21=1 & alu_X5 & ImmU16 {
+		local tmp:4 = alu_X5 & 0x0000FFFF;
+		alu_X5 = tmp | (ImmU16 << 16);
+	}
+	
+	:D5=TI_S16 is  Rs = 1 & MajOp=0b000 & imm_21=0 & TI_S16 & D5 {
+		D5 = TI_S16;
+	}  
+
+
+	:D5 = "and"(S5,#s10) is Rs=0 & MajOp = 0b110 & imm_22_23=0b00 & imm_21 & S5 & imm_5_13 & D5 [ s10 = (imm_21 << 9) | imm_5_13;] {
+		D5 = S5 & s10;
+	} 
+
+
+    # ALU32/PRED
+    # Compare
+	:D2="cmp.eq"(S5, "num") is Rs = 0 & MajOp=0b101 & imm_22_23=0b00 & imm_21 & S5 & imm_5_13 & imm_2_4=0b000 & D2 {
+	}  
+
+}
+
+
+ # JR / J
+ with slot: iclass=0b0101 {
+    # JR
+
+    # call from reg
+	 slot:"callr" S5 is imm_21_27=0b0000101 & S5 & imm_0_13=0b00000000000000 {
+         _stub();
+	 }
+
+	 slot:"if ("U2") callr" S5 is imm_21_27=0b0001000 & S5 & imm_10_13=0 & U2 & imm_0_7=0 {
+         _stub();
+	 }
+	 slot:"if (!"U2") callr" S5 is imm_21_27=0b0001001 & S5 & imm_10_13=0 & U2 & imm_0_7=0 {
+         _stub();
+	 }
+
+
+    # Jump to addr from reg
+	 slot:"jumpr" S5 is imm_21_27=0b0010100 & S5 & imm_0_13=0b00000000000000 {
+		goto [S5];
+	 }
+
+
+     # J
+
+     # Call subroutine
+	 slot:"call" is imm_25_27=0b101 & imm_16_25  & imm_1_13 & imm_0=0 {
+     _stub();
+	 }
+
+	 slot:"if ("U2") call num" is imm_24_27=0b1101 & imm_22_23 & imm_21=0 & imm_16_20 & imm_13 & imm_12=0 & imm_11=0 & imm_10=0 & U2 & imm_1_7 & imm_0=0 {
+     _stub();
+	 }
+
+	 slot:"if (!"U2") call num" is imm_24_27=0b1101 & imm_22_23 & imm_21=1 & imm_16_20 & imm_13 & imm_12=0 & imm_11=0 & imm_10=0 & U2 & imm_1_7 & imm_0=0 {
+     _stub();
+	 }
+
+
+     # Jump to address
+
+    slot:"J" Addr32i  is imm_25_27=0b100  &  imm_0_1 & Addr32i {
+        goto Addr32i;
+     }
+
+	 slot:"if ("U2") jump:nt num" is  imm_24_27=0b1100 & imm_22_23 & imm_21=0 & imm_16_20 & imm_13 & imm_11_12=0b00 & imm_10=0 & U2 & imm_1_7 & imm_0=0 {
+     _stub();
+	 }
+
+	 slot:"if ("U2") jump:t num" is  imm_24_27=0b1100 & imm_22_23 & imm_21=0 & imm_16_20 & imm_13 & imm_11_12=0b10 & imm_10=0 & U2 & imm_1_7 & imm_0=0 {
+     _stub();
+	 }
+     
+	 slot:"if (!"U2") jump:nt num" is  imm_24_27=0b1100 & imm_22_23 & imm_21=1 & imm_16_20 & imm_13 & imm_11_12=0b00 & imm_10=0 & U2 & imm_1_7 & imm_0=0 {
+     _stub();
+	 }
+
+	 slot:"if (!"U2") jump:t num" is  imm_24_27=0b1100 & imm_22_23 & imm_21=1 & imm_16_20 & imm_13 & imm_11_12=0b10 & imm_10=0 & U2 & imm_1_7 & imm_0=0 {
+     _stub();
+	 }
+
+
+
+#d
+    
+ }
+
+
+
+# CR
+with slot: iclass=0b0110 {
+    #endloop - no encoding?
+
+    # Corner detection
+    slot:"fastcorner9" is imm_20_27=0b10110000 & imm_18_19=0b00 & S2 & imm_13=1 & imm_10_12=0b000 & T2 & imm_7=1 & imm_5_6=0b00 & imm_4=1 & imm_2_3=0b00 & D2 {
+        _stub();
+    }
+    slot:"!fastcorner9" is imm_20_27=0b10110001 & imm_18_19=0b00 & S2 & imm_13=1 & imm_10_12=0b000 & T2 & imm_7=1 & imm_5_6=0b00 & imm_4=1 & imm_2_3=0b00 & D2 {
+        _stub();
+    }
+
+    # Logical reduction
+    slot:"all8" is imm_20_27=0b10111000 & imm_18_19=0b00 & S2 & imm_13=0 & imm_2_12=0 & D2 {
+        _stub();
+    }
+    slot:"any8" is imm_20_27=0b10111010 & imm_18_19=0b00 & S2 & imm_13=0 & imm_2_12=0 & D2 {
+        _stub();
+    }
+
+    # Loops
+    slot:"loop0" is imm_21_27=0b0000000 & S5 & imm_13=0 & imm_8_12 & imm_5_7=0 & imm_3_4 & imm_0_2=0 {
+        _stub();
+    }
+    slot:"loop1" is imm_21_27=0b0000001 & S5 & imm_13=0 & imm_8_12 & imm_5_7=0 & imm_3_4 & imm_0_2=0 {
+        _stub();
+    }
+    slot:"loop0_" is imm_21_27=0b1001000 & S5 & imm_13=0 & imm_8_12 & imm_5_7=0 & imm_3_4 & imm_0_2=0 {
+        _stub();
+    }
+    slot:"loop1_" is imm_21_27=0b1001001 & S5 & imm_13=0 & imm_3_12 & imm_2=0 & imm_0_1  {
+        _stub();
+    }
+
+    # Pc add
+    slot:"pcadd" is imm_16_27=0b101001001001 & imm_13=0 & imm_7_12 & imm_5_6=0 & D5 {
+        _stub();
+    }
+
+    # Pipelined loop TODO
+
+    # Logical predicates TODO
+
+    # User control register transfer
+    slot: D5 = S5_ctrl is imm_21_27=0b1010000 & S5_ctrl & imm_5_13=0 & D5 {
+        D5 = S5_ctrl;
+    }
+}
+
+# LD
+with slot: iclass=0b1001 {
+    slot:"deallocframe()" is imm_21_27=0b0000000 & S5 & imm_13=0 & imm_5_12=0 & D5  {
+        _stub();
+    }
+
+    slot:D5"=dealloc_return("S5"):raw" is imm_21_27=0b0110000 & S5 & imm_10_13=0 & imm_5_9=0 & D5  {
+        local EA:4 = S5;
+        local tmp:8 = *[ram]:4 EA;
+        D5 = tmp:4;
+        local tmp2:8 = tmp>>32;
+        local tmp3:4 = tmp2:4;
+        SP = EA+8;
+        return [tmp3];
+    }
+}
+
+# ST
+with slot: iclass=0b1010 {
+    slot:"allocframe("S5","U11"):raw" is imm_21_27=0b0000100 & S5 & imm_11_13=0b000 & imm_0_10 [ U11 = imm_0_10 << 3; ] {
+        local EA:4 = S5 - 8;
+        local lr_8:8 = zext(LR);
+        local fp_8:8 = zext(FP);
+        *[ram]:8 EA = (lr_8 << 32) | fp_8;
+        FP = EA;
+        S5 = EA - U11;
+    }
+}
+with slot: iclass=0b0011 {
+
+MEMW_S8: is imm_0_6 & imm_13 {
+	local loc:1 = imm_0_6 | (imm_13 << 8);
+   local loc1:4 = sext(loc);
+    export *:4 loc1;
+}
+
+    slot:"memw("S5"+"U6"=#"MEMW_S8")" is imm_25_27=0b110 & imm_23_24=0 & imm_21_22=0b10 & S5 & imm_7_12 & MEMW_S8 [ U6 = imm_7_12 << 2; ] {
+        local EA:4 = S5 + U6;
+        *[ram]:4 EA = MEMW_S8;
+
+    }
+}
+
+
+
+# system
+
+define pcodeop isync;
+define pcodeop dckill;
+define pcodeop ickill;
+
+slot:"isync" is iclass=0b0101 & imm_16_27=0b011111000000 & imm_13=0 & imm_10_12=0 & imm_0_9=0b0000000010 {
+	isync();
+}
+
+
+# System / monitor
+slot:"trans" is iclass=0b0110 & imm_22_27=0b011100 & imm_21=0 & S5 & imm_7_13=0 & D7 {
+	_stub();
+}
+slot:"dckill" is iclass=0b1010 & imm_21_27=0b0010000 & imm_16_20=0 & imm_0_13=0 {
+	dckill();
+}
+slot:"ickill" is iclass=0b0101 & imm_21_27=0b0110110 & imm_16_20=0 & imm_11_13=0b010 & imm_0_10=0 {
+	ickill();
+}
+
+
+
+slot0: slot is slot &  (parse=0b01 | parse=0b10) { build slot; }
+slot1: slot0 is slot0 { build slot0; }
+slot2: slot0 is slot0 { build slot0; }
+slotX: slot is slot & parse=0b11  { build slot; }
+duplex:"duplex" is imm32 {
+}
+
+slotX: duplex is duplex & parse=0b00  { build duplex; }
+
+:{ slot0 slot1 slotX } is slot0;slot1;slotX {
+	build slot0;
+	build slot1;
+	build slotX;
+}
+:{ slot0 slot1 slot2 slotX } is slot0;slot1;slot2;slotX {
+	build slot0;
+	build slot1;
+	build slot2;
+	build slotX;
+}
+
+#:{{ slot0 }} is slot0 {
+#build slot0;
+#}
+
+:{ slotX } is slotX {
+	build slotX;
+} 
+
+#define register offset=0x00 size=1 [ Rd ];
+
+#define register offset=0x00 size=2 [ AF  BC  DE  HL ];
+#define register offset=0x20 size=1 [ A_ F_ B_ C_ D_ E_ H_ L_ ]; # Alternate registers
+#define register offset=0x20 size=2 [ AF_   BC_   DE_   HL_ ]; # Alternate registers
+
+#define register offset=0x40 size=2 [ _  PC SP IX IY ];
+
+#define register offset=0x50 size=1 [ rCBAR rCBR rBBR ];
+
+# Define context bits (if defined, size must be multiple of 4-bytes)
+#define register offset=0xf0 size=4   contextreg;
+
+#define context contextreg
+  #assume8bitIOSpace		= (0,0)
+#;
+
+# Flag bits (?? manual is very confusing - could be typos!)
+#@define C_flag "F[0,1]"		# C: Carry
+#@define N_flag "F[1,1]"		# N: Add/Subtract
+#@define PV_flag "F[2,1]"	# PV: Parity/Overflow
+#@define H_flag "F[4,1]"		# H: Half Carry
+#@define Z_flag "F[6,1]"		# Z: Zero
+#@define S_flag "F[7,1]"		# S: Sign
+
+# Include contents of skel.sinc file
+#@include "skel.sinc"
