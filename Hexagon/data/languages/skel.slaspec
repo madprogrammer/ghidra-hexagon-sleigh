@@ -3,6 +3,11 @@
 # Other language modules (see Ghidra/Processors) may provide better examples
 # when creating a new language module.
 
+
+# List of nice-to-haves in SELIGH
+# arbitary bit-count sext, not just bytes
+# allow sext and s>> in [] bit of constructor
+
 define endian=little;
 define alignment=4;
 
@@ -12,16 +17,22 @@ define space register type=register_space size=4;
 define token instr (32)
    iclass     = (28,31)
 
+   imm_27 = (27, 27)
+
    imm_25_27 = (25, 27)
+   imm_25_26 = (25, 26) signed
 
    imm_24_27 = (24, 27)
 
    imm_23_24 = (23, 24)
+   imm_23 = (23, 23)
 
    imm_22_27 = (22, 27)
    imm_22_23 = (22, 23)
 
-   imm_21_27 = (21, 27)
+   imm_21_27 = (21, 27) signed
+   imm_21_24 = (21, 24)
+   imm_21_23 = (21, 23)
    imm_21_22 = (21, 22)
    imm_21 = (21, 21)
 
@@ -35,7 +46,7 @@ define token instr (32)
    imm_16_23 = (16, 23)
    imm_16_20 = (16, 20)
 
-   imm_13 = (13, 13)
+   imm_13 = (13, 13) signed
    imm_12 = (12, 12)
 
    imm_11_13 = (11, 13)
@@ -46,13 +57,16 @@ define token instr (32)
    imm_10_12 = (10, 12)
    imm_10 = (10, 10)
 
+   imm_8_13 = (8, 13)
    imm_8_12 = (8, 12)
 
    imm_7_13 = (7, 13)
    imm_7_12 = (7, 12)
    imm_7 = (7, 7)
 
-   imm_5_13 = (5, 13)
+   imm_6_13 = (6, 13)
+
+   imm_5_13 = (5, 13) signed
    imm_5_12 = (5, 12)
    imm_5_9 = (5, 9)
    imm_5_7 = (5, 7)
@@ -62,19 +76,23 @@ define token instr (32)
 
    imm_3_12 = (3, 12)
    imm_3_4 = (3, 4)
+   imm_3 = (3, 3)
 
    imm_2_12 = (2, 12)
+   imm_2_7 = (2, 7)
+   imm_2_5 = (2, 5)
    imm_2_4 = (2, 4)
    imm_2_3 = (2, 3)
    imm_2 = (2, 2)
 
    imm_1_13 = (1, 13)
    imm_1_7 = (1, 7)
+   imm_1_2 = (1, 2)
 
    imm_0_13 = (0, 13)
    imm_0_10 = (0, 10)
    imm_0_9 = (0, 9)
-   imm_0_7 = (0, 7)
+   imm_0_7 = (0, 7) signed
    imm_0_6 = (0, 6)
    imm_0_2 = (0, 2)
    imm_0_1 = (0, 1)
@@ -84,10 +102,18 @@ define token instr (32)
    S2 = (16,17)
    T2 = (8,9)
    D2 = (0,1)
+
+   S2_pred = (16,17)
+   T2_pred = (8,9)
+   D2_pred = (0,1)
+   U2_pred = (8,9)
+
+   T5 = (8,12)
    
    
    Rs = (27, 27)
    MajOp = (24,26)
+   MinOp = (21,23)
    D7 = (0,7)
    D5 = (0,4)
    D5_ctrl = (0,4)
@@ -250,7 +276,7 @@ P1
 P2
 P3
 ];
-attach variables [ U2 ] [
+attach variables [ U2 D2_pred T2_pred S2_pred U2_pred ] [
 P0
 P1
 P2
@@ -282,22 +308,18 @@ Addr32i:  is    imm_16_24 & imm_1_13 {
 
  
 # Add
-ADD_S16: is imm_21_27 & imm_5_13 {
-	local loc:2 = ((imm_21_27 << 9) | (imm_5_13));
-	local loc1:4 = sext(loc);
-    export loc1;
-}
-ADD_S16p: ADD_S16 is ADD_S16  {
-    export ADD_S16;
-}
-
-slot:D5" = add("S5",#"ADD_S16p")" is iclass=0b1011 & S5 & D5 & ADD_S16p {
-    D5 = S5 + ADD_S16p;
+slot:D5" = add("S5",#"loc")" is iclass=0b1011 & S5 & D5 & imm_21_27 & imm_5_13 [loc= ((imm_21_27 << 9) | (imm_5_13));] {
+    D5 = S5 + sext(loc:2);
 } 
+
+# Sub
+slot:D5" = sub("T5","S5")" is iclass=0b1111 & imm_21_27=0b0011001 & S5 & imm_13=0 & T5 & imm_5_7=0 & D5 {
+    D5 = T5 - S5;
+    } 
  
  # alu32
  with slot: iclass=0b0111 {
-
+    # ALU32/ALU
 
 
 
@@ -337,6 +359,12 @@ slot:D5" = add("S5",#"ADD_S16p")" is iclass=0b1011 & S5 & D5 & ADD_S16p {
 		D5 = S5 & s10;
 	} 
 
+    # Transfer register
+	:D5"="S5 is Rs = 0 & MajOp = 0b000 & MinOp=0b011 & S5 & imm_13=0 & imm_5_12=0 & D5 {
+        D5 = S5;
+	}
+
+
 
     # ALU32/PRED
     # Compare
@@ -372,8 +400,17 @@ slot:D5" = add("S5",#"ADD_S16p")" is iclass=0b1011 & S5 & D5 & ADD_S16p {
      # J
 
      # Call subroutine
-	 slot:"call" is imm_25_27=0b101 & imm_16_25  & imm_1_13 & imm_0=0 {
-     _stub();
+    Call_R22: is imm_16_25 & imm_1_13 {
+        local loc:4 = (((imm_16_25 << 13) | (imm_1_13)) << 2);
+        local loc1:3 = loc:3;
+        local loc2:4 = sext(loc1);
+
+        local loc3:4 = loc2 + inst_start;
+        export *:4 loc3;
+      }
+	 slot:"call" Call_R22 is imm_25_27=0b101 & Call_R22 & imm_0=0 {
+        LR = inst_next;
+        call Call_R22;
 	 }
 
 	 slot:"if ("U2") call num" is imm_24_27=0b1101 & imm_22_23 & imm_21=0 & imm_16_20 & imm_13 & imm_12=0 & imm_11=0 & imm_10=0 & U2 & imm_1_7 & imm_0=0 {
@@ -457,6 +494,61 @@ with slot: iclass=0b0110 {
     # Pipelined loop TODO
 
     # Logical predicates TODO
+    slot:D2_pred"=and("T2_pred", "S2_pred")" is imm_20_27=0b10110000 & imm_18_19=0 & S2_pred & imm_13=0 & imm_10_12=0 & T2_pred & imm_2_7=0 & D2_pred {
+        D2_pred = T2_pred & S2_pred;
+    }
+
+    slot:D2_pred"=and("S2_pred", and("T2_pred","U2_pred"))" is imm_20_27=0b10110001 & imm_18_19=0 & S2_pred & imm_13=0 & imm_10_12=0 & T2_pred & U2_pred & imm_2_5=0 & D2_pred {
+        D2_pred = S2_pred & T2_pred & U2_pred;
+    }
+
+    slot:D2_pred"=or("T2_pred", "S2_pred")" is imm_20_27=0b10110010 & imm_18_19=0 & S2_pred & imm_13=0 & imm_10_12=0 & T2_pred & imm_2_7=0 & D2_pred {
+        D2_pred = T2_pred | S2_pred;
+    }
+
+    slot:D2_pred"=and("S2_pred", or("T2_pred","U2_pred"))" is imm_20_27=0b10110011 & imm_18_19=0 & S2_pred & imm_13=0 & imm_10_12=0 & T2_pred & U2_pred & imm_2_5=0 & D2_pred {
+        D2_pred = S2_pred & (T2_pred | U2_pred);
+    }
+
+    slot:D2_pred"=xor("T2_pred", "S2_pred")" is imm_20_27=0b10110100 & imm_18_19=0 & S2_pred & imm_13=0 & imm_10_12=0 & T2_pred & imm_2_7=0 & D2_pred {
+        D2_pred = T2_pred ^ S2_pred;
+    }
+
+    slot:D2_pred"=or("S2_pred", and("T2_pred","U2_pred"))" is imm_20_27=0b10110101 & imm_18_19=0 & S2_pred & imm_13=0 & imm_10_12=0 & T2_pred & U2_pred & imm_2_5=0 & D2_pred {
+        D2_pred = S2_pred & (T2_pred | U2_pred);
+    }
+
+    slot:D2_pred"=and("T2_pred", !"S2_pred")" is imm_20_27=0b10110110 & imm_18_19=0 & S2_pred & imm_13=0 & imm_10_12=0 & T2_pred & imm_2_7=0 & D2_pred {
+        D2_pred = T2_pred & ~S2_pred;
+    }
+
+    slot:D2_pred"=or("S2_pred", or("T2_pred","U2_pred"))" is imm_20_27=0b10110111 & imm_18_19=0 & S2_pred & imm_13=0 & imm_10_12=0 & T2_pred & U2_pred & imm_2_5=0 & D2_pred {
+        D2_pred = S2_pred | (T2_pred | U2_pred);
+    }
+
+    slot:D2_pred"=and("S2_pred", and("T2_pred", !"U2_pred"))" is imm_20_27=0b10111001 & imm_18_19=0 & S2_pred & imm_13=0 & imm_10_12=0 & T2_pred & U2_pred & imm_2_5=0 & D2_pred {
+        D2_pred = S2_pred & (T2_pred & ~U2_pred);
+    }
+
+    slot:D2_pred"=and("S2_pred", or("T2_pred", !"U2_pred"))" is imm_20_27=0b10111011 & imm_18_19=0 & S2_pred & imm_13=0 & imm_10_12=0 & T2_pred & U2_pred & imm_2_5=0 & D2_pred {
+        D2_pred = S2_pred & (T2_pred | ~U2_pred);
+    }
+
+    slot:D2_pred"=not("S2_pred")" is imm_20_27=0b10111100 & imm_18_19=0 & S2_pred & imm_13=0 & imm_2_12=0 & D2_pred {
+        D2_pred = ~S2_pred;
+    }
+
+    slot:D2_pred"=or("S2_pred", and("T2_pred", !"U2_pred"))" is imm_20_27=0b10111101 & imm_18_19=0 & S2_pred & imm_13=0 & imm_10_12=0 & T2_pred & U2_pred & imm_2_5=0 & D2_pred {
+        D2_pred = S2_pred | (T2_pred & ~U2_pred);
+    }
+
+    slot:D2_pred"=or("T2_pred", !"S2_pred")" is imm_20_27=0b10111110 & imm_18_19=0 & S2_pred & imm_13=0 & imm_10_12=0 & T2_pred & imm_2_7=0 & D2_pred {
+        D2_pred = T2_pred | ~S2_pred;
+    }
+
+    slot:D2_pred"=or("S2_pred", or("T2_pred", !"U2_pred"))" is imm_20_27=0b10111111 & imm_18_19=0 & S2_pred & imm_13=0 & imm_10_12=0 & T2_pred & U2_pred & imm_2_5=0 & D2_pred {
+        D2_pred = S2_pred | (T2_pred | ~U2_pred);
+    }
 
     # User control register transfer
     slot: D5 = S5_ctrl is imm_21_27=0b1010000 & S5_ctrl & imm_5_13=0 & D5 {
@@ -466,6 +558,14 @@ with slot: iclass=0b0110 {
 
 # LD
 with slot: iclass=0b1001 {
+    # Load word
+    slot:D5"=memw("S5"+#"s11")" is imm_27=0 & imm_25_26 & imm_21_24=0b1100 & S5 & imm_5_13 & D5 [s11 = (imm_5_13 | (imm_25_26 << 9))<<2;] {
+        local tmp:2 = s11 << 3;
+        local tmp1:2 = tmp s>> 3;
+        local EA:4 = S5 + sext(tmp1);
+        D5 = *[ram]:4 EA;
+    }
+
     slot:"deallocframe()" is imm_21_27=0b0000000 & S5 & imm_13=0 & imm_5_12=0 & D5  {
         _stub();
     }
@@ -481,8 +581,57 @@ with slot: iclass=0b1001 {
     }
 }
 
+
+# MEMOP
+with slot: iclass=0b0011 {
+    # On memory word
+
+    slot:"memw()+=R" is imm_24_27=0b1110 & imm_23=0 & imm_21_22=0b01 & S5 & imm_13=0 & imm_7_12 & imm_5_6=0b00 & T5 {
+    _stub();
+    }
+
+    slot:"memw()-=R" is imm_24_27=0b1110 & imm_23=0 & imm_21_22=0b01 & S5 & imm_13=0 & imm_7_12 & imm_5_6=0b01 & T5 {
+    _stub();
+    }
+
+    slot:"memw()&=R" is imm_24_27=0b1110 & imm_23=0 & imm_21_22=0b01 & S5 & imm_13=0 & imm_7_12 & imm_5_6=0b10 & T5 {
+    _stub();
+    }
+
+    slot:"memw()|=R" is imm_24_27=0b1110 & imm_23=0 & imm_21_22=0b01 & S5 & imm_13=0 & imm_7_12 & imm_5_6=0b11 & T5 {
+    _stub();
+    }
+
+    slot:"memw()+=I" is imm_24_27=0b1111 & imm_23=0 & imm_21_22=0b01 & S5 & imm_13=0 & imm_7_12 & imm_5_6=0b00 & T5 {
+    _stub();
+    }
+
+    slot:"memw()-=I" is imm_24_27=0b1111 & imm_23=0 & imm_21_22=0b01 & S5 & imm_13=0 & imm_7_12 & imm_5_6=0b01 & T5 {
+    _stub();
+    }
+
+    slot:"memw()=clrbit" is imm_24_27=0b1111 & imm_23=0 & imm_21_22=0b01 & S5 & imm_13=0 & imm_7_12 & imm_5_6=0b10 & T5 {
+    _stub();
+    }
+
+    slot:"memw()=setbit" is imm_24_27=0b1111 & imm_23=0 & imm_21_22=0b01 & S5 & imm_13=0 & imm_7_12 & imm_5_6=0b11 & T5 {
+    _stub();
+    }
+}
+
+
 # ST
 with slot: iclass=0b1010 {
+    # Store word
+
+    slot:"memw("S5" + "s11")="T5 is imm_27=0 & imm_25_26 & imm_21_24=0b1100 & S5 & imm_13 & T5 & imm_0_7 [s11 = (imm_0_7 | (imm_13 << 8) | (imm_25_26 << 9)) << 2;] {
+        local tmp:2 = s11 << 3;
+        local tmp1:2 = tmp s>> 3;
+        local EA:4 = S5 + sext(tmp1);
+        *[ram]:4 EA = T5;
+    }
+
+
     slot:"allocframe("S5","U11"):raw" is imm_21_27=0b0000100 & S5 & imm_11_13=0b000 & imm_0_10 [ U11 = imm_0_10 << 3; ] {
         local EA:4 = S5 - 8;
         local lr_8:8 = zext(LR);
@@ -500,9 +649,9 @@ MEMW_S8: is imm_0_6 & imm_13 {
     export *:4 loc1;
 }
 
-    slot:"memw("S5"+"U6"=#"MEMW_S8")" is imm_25_27=0b110 & imm_23_24=0 & imm_21_22=0b10 & S5 & imm_7_12 & MEMW_S8 [ U6 = imm_7_12 << 2; ] {
+    slot:"memw("S5"+"U6"=#"S8")" is imm_25_27=0b110 & imm_23_24=0 & imm_21_22=0b10 & S5 & imm_7_12 & imm_0_6 & imm_13 [ U6 = imm_7_12 << 2; S8=imm_0_6 | (imm_13 << 8);] {
         local EA:4 = S5 + U6;
-        *[ram]:4 EA = MEMW_S8;
+        *[ram]:4 EA = sext(S8:1);
 
     }
 }
@@ -529,6 +678,53 @@ slot:"dckill" is iclass=0b1010 & imm_21_27=0b0010000 & imm_16_20=0 & imm_0_13=0 
 }
 slot:"ickill" is iclass=0b0101 & imm_21_27=0b0110110 & imm_16_20=0 & imm_11_13=0b010 & imm_0_10=0 {
 	ickill();
+}
+
+
+# XTYPE - pain starts here
+# XTYPE/BIT
+with slot: iclass=0b1000 {
+    # ..
+
+    # Set/clear/toggle bit
+    :D5"=setbit("S5",#"imm_8_12")" is imm_21_27=0b1100110 & S5 & imm_13=0 & imm_8_12 & imm_5_7=0b000 & D5 {
+       D5 = S5 | (1 << imm_8_12);
+    }
+
+    :D5"=clrbit("S5",#"imm_8_12")" is imm_21_27=0b1100110 & S5 & imm_13=0 & imm_8_12 & imm_5_7=0b001 & D5 {
+       D5 = S5 & ~(1 << imm_8_12);
+    }
+
+    # ..
+}
+
+# XTYPE/SHIFT
+with slot: iclass=0b1000 {
+# Shift by imm
+    :D5"=asr("S5",#"imm_8_12")" is imm_21_27=0b1100000 & S5 & imm_13=0 & imm_8_12 & imm_5_7=0b000 & D5 {
+        D5 = S5 s>> imm_8_12;
+    }
+
+# Shift by imm and acc
+# ..
+    :alu_X5"+=lsr("S5",#"imm_8_13")" is imm_22_27=0b001000 & imm_21=0 & S5 & imm_8_13 & imm_5_7=0b101 & alu_X5 {
+        alu_X5 = alu_X5 + S5 >> imm_8_13;
+        _stub();
+        #TODO: chk this, might be a pair
+    }
+
+    :alu_X5"+=lsr("S5",#"imm_8_12")" is imm_22_27=0b111000 & imm_21=0 & S5 & imm_13=0 & imm_8_12 & imm_5_7=0b101 & alu_X5 {
+        alu_X5 = alu_X5 + S5 >> imm_8_12;
+    }
+#..
+
+
+}
+
+# Shift by imm and logical
+# ..
+slot: "alu_X5=or(#"u8",asl("alu_X5", #"imm_8_12"))" is iclass=0b1101 & imm_24_27=0b1110 & imm_21_23 & alu_X5 & imm_13 & imm_8_12 & imm_5_7 & imm_4=0 & imm_3 & imm_1_2=0b01 & imm_0=0 [ u8 = imm_3 | (imm_5_7 << 1) | (imm_13 << 4) | (imm_21_23 << 5); ] {
+    alu_X5 = u8 | (alu_X5 << imm_8_12);
 }
 
 
