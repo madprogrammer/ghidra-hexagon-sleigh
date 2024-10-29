@@ -17,6 +17,8 @@ define space register type=register_space size=4;
 define token instr (32)
    iclass     = (28,31)
 
+   imm_29_31 = (29, 31)
+
    imm_27 = (27, 27)
 
    imm_25_27 = (25, 27)
@@ -284,13 +286,6 @@ P3
 ];
 
 
-
-#macro bse(out,v0,bits) {
-#	out = (v0 << bits);
-#	out = out s>> bits;
-#}
-
-
 Addr32i:  is    imm_16_24 & imm_1_13 {
 
 
@@ -307,27 +302,87 @@ Addr32i:  is    imm_16_24 & imm_1_13 {
  define pcodeop _stub;
 
  
-# Add
+# ALU32/ALU:add
 slot:D5" = add("S5",#"loc")" is iclass=0b1011 & S5 & D5 & imm_21_27 & imm_5_13 [loc= ((imm_21_27 << 9) | (imm_5_13));] {
     D5 = S5 + sext(loc:2);
 } 
+slot:D5" = add("S5","T5")" is iclass=0b1111 & S5 & D5 & imm_21_27=0b0011000 & S5 & imm_13=0 & T5 & imm_5_7=0 {
+    D5 = S5 + T5;
+} 
+slot:D5" = add("S5","T5"):sat" is iclass=0b1111 & S5 & D5 & imm_21_27=0b0011001 & S5 & imm_13=0 & T5 & imm_5_7=0 {
+    #D5 = S5 + T5;
+    _stub();
+} 
 
-# Sub
-slot:D5" = sub("T5","S5")" is iclass=0b1111 & imm_21_27=0b0011001 & S5 & imm_13=0 & T5 & imm_5_7=0 & D5 {
-    D5 = T5 - S5;
-    } 
- 
- # alu32
- with slot: iclass=0b0111 {
-    # ALU32/ALU
+# ALU32/ALU:logical
+with slot: iclass=0b0111 {
+	:D5 = "and"(S5,#s10) is Rs=0 & MajOp = 0b110 & imm_22_23=0b00 & imm_21 & S5 & imm_5_13 & D5 [ s10 = (imm_21 << 9) | imm_5_13;] {
+		D5 = S5 & s10;
+	} 
 
+	:D5 = "or"(S5,#s10) is Rs=0 & MajOp = 0b110 & imm_22_23=0b10 & imm_21 & S5 & imm_5_13 & D5 [ s10 = (imm_21 << 9) | imm_5_13;] {
+		D5 = S5 & s10;
+	} 
+}
+with slot: iclass=0b1111 {
+	:D5 = "and("S5","T5")" is imm_21_27=0b0001000 & S5 & imm_13=0 & T5 & imm_5_7=0 & D5 {
+		D5 = S5 & T5;
+	} 
 
+	:D5 = "or("S5","T5")" is imm_21_27=0b0001001 & S5 & imm_13=0 & T5 & imm_5_7=0 & D5 {
+		D5 = S5 | T5;
+	} 
 
+	:D5 = "xor("S5","T5")" is imm_21_27=0b0001011 & S5 & imm_13=0 & T5 & imm_5_7=0 & D5 {
+		D5 = S5 ^ T5;
+	} 
+
+	:D5 = "and("T5",~"S5")" is imm_21_27=0b0001100 & S5 & imm_13=0 & T5 & imm_5_7=0 & D5 {
+		D5 = T5 & (~S5);
+	} 
+
+	:D5 = "or("T5",~"S5")" is imm_21_27=0b0001101 & S5 & imm_13=0 & T5 & imm_5_7=0 & D5 {
+		D5 = T5 | (~S5);
+	} 
+}
+# ALU32/ALU:negate
+# TODO
+
+# ALU32/ALU:nop
+with slot: iclass=0b0111 {
 	:"nop" is imm_24_27=0b1111 & imm_16_23  & imm_0_13 {}
+}
 
-  
-  
-  	# Transfer imm
+# ALU32/ALU:subtract
+with slot: iclass=0b0111 {
+	slot:" = sub()" is imm_22_27=0b011001 & imm_21 & S5 & imm_5_13 & D5 {
+		_stub();
+	} 
+}
+with slot: iclass=0b1111 {
+	slot:D5" = sub("T5","S5")" is imm_21_27=0b0011001 & S5 & imm_13=0 & T5 & imm_5_7=0 & D5 {
+	    D5 = T5 - S5;
+	} 
+
+	slot:D5" = sub("T5","S5"):sat" is imm_21_27=0b0110110 & S5 & imm_13=0 & T5 & imm_5_7=0 & D5 {
+		_stub();
+	    #D5 = T5 - S5;
+	} 
+}
+
+
+# ALU32/ALU:sext
+with slot: iclass=0b0111 {
+	slot:D5" = sxtb("S5")" is imm_21_27=0b0000101 & S5 & imm_13=0 & imm_5_12=0 & D5 {
+	_stub();
+	} 
+	slot:D5" = sxth("S5")" is imm_21_27=0b0000111 & S5 & imm_13=0 & imm_5_12=0 & D5 {
+	_stub();
+	} 
+}
+
+# ALU32/ALU:trans_imm
+ with slot: iclass=0b0111 {
   	
 	ImmU16: v is    imm_22_23 & imm_0_13  [ v = (imm_22_23 << 13) | (imm_0_13); ] {
 		local v1:4 = v;
@@ -353,20 +408,34 @@ slot:D5" = sub("T5","S5")" is iclass=0b1111 & imm_21_27=0b0011001 & S5 & imm_13=
 	:D5=TI_S16 is  Rs = 1 & MajOp=0b000 & imm_21=0 & TI_S16 & D5 {
 		D5 = TI_S16;
 	}  
+}
 
 
-	:D5 = "and"(S5,#s10) is Rs=0 & MajOp = 0b110 & imm_22_23=0b00 & imm_21 & S5 & imm_5_13 & D5 [ s10 = (imm_21 << 9) | imm_5_13;] {
-		D5 = S5 & s10;
-	} 
+# ALU32/ALU:trans_reg
+ with slot: iclass=0b0111 {
 
     # Transfer register
 	:D5"="S5 is Rs = 0 & MajOp = 0b000 & MinOp=0b011 & S5 & imm_13=0 & imm_5_12=0 & D5 {
         D5 = S5;
 	}
+}
+
+
+# ALU32/ALU:vechw
+# ALU32/ALU:vecahw
+# ALU32/ALU:vecshw
+
+# ALU32/ALU:zext
+ with slot: iclass=0b0111 {
+	:D5"="S5 is imm_21_27=0b0000110 & S5 & imm_13=0 & imm_5_12=0 & D5 {
+	_stub();
+	}
+}
 
 
 
-    # ALU32/PRED
+# ALU32/PRED
+ with slot: iclass=0b0111 {
     # Compare
 	:D2="cmp.eq"(S5, "num") is Rs = 0 & MajOp=0b101 & imm_22_23=0b00 & imm_21 & S5 & imm_5_13 & imm_2_4=0b000 & D2 {
 	}  
@@ -395,10 +464,12 @@ slot:D5" = sub("T5","S5")" is iclass=0b1111 & imm_21_27=0b0011001 & S5 & imm_13=
 	 slot:"jumpr" S5 is imm_21_27=0b0010100 & S5 & imm_0_13=0b00000000000000 {
 		goto [S5];
 	 }
+ }
 
 
      # J
 
+ with slot: iclass=0b0101 {
      # Call subroutine
     Call_R22: is imm_16_25 & imm_1_13 {
         local loc:4 = (((imm_16_25 << 13) | (imm_1_13)) << 2);
@@ -450,6 +521,9 @@ slot:D5" = sub("T5","S5")" is iclass=0b1111 & imm_21_27=0b0011001 & S5 & imm_13=
     
  }
 
+# Compare and jump
+#with slot: iclass=0b0001 {
+#}
 
 
 # CR
@@ -551,6 +625,15 @@ with slot: iclass=0b0110 {
     }
 
     # User control register transfer
+#    slot: D5_ctrl = S5 is imm_21_27=0b0010001 & S5_ctrl & imm_5_13=0 & D5 {
+#        D5_ctrl = S5;
+#    }
+#    slot: "D5_ctrl = S5 (dd/ss)" is imm_21_27=0b0011001 & S5_ctrl & imm_5_13=0 & D5 {
+#        #D5 = S5_ctrl;
+#    }
+#    slot: "D5 = S5_ctrl (dd/ss)" is imm_21_27=0b1000000 & S5_ctrl & imm_5_13=0 & D5 {
+#        #D5 = S5_ctrl;
+#    }
     slot: D5 = S5_ctrl is imm_21_27=0b1010000 & S5_ctrl & imm_5_13=0 & D5 {
         D5 = S5_ctrl;
     }
@@ -643,11 +726,6 @@ with slot: iclass=0b1010 {
 }
 with slot: iclass=0b0011 {
 
-MEMW_S8: is imm_0_6 & imm_13 {
-	local loc:1 = imm_0_6 | (imm_13 << 8);
-   local loc1:4 = sext(loc);
-    export *:4 loc1;
-}
 
     slot:"memw("S5"+"U6"=#"S8")" is imm_25_27=0b110 & imm_23_24=0 & imm_21_22=0b10 & S5 & imm_7_12 & imm_0_6 & imm_13 [ U6 = imm_7_12 << 2; S8=imm_0_6 | (imm_13 << 8);] {
         local EA:4 = S5 + U6;
@@ -728,14 +806,43 @@ slot: "alu_X5=or(#"u8",asl("alu_X5", #"imm_8_12"))" is iclass=0b1101 & imm_24_27
 }
 
 
+duplex:"duplex_0x0" is imm_29_31=0b000 & imm_13=0 {
+}
+duplex:"duplex_0x1" is imm_29_31=0b000 & imm_13=1 {
+}
+duplex:"duplex_0x2" is imm_29_31=0b001 & imm_13=0 {
+}
+duplex:"duplex_0x3" is imm_29_31=0b001 & imm_13=1 {
+}
+duplex:"duplex_0x4" is imm_29_31=0b010 & imm_13=0 {
+}
+duplex:"duplex_0x5" is imm_29_31=0b010 & imm_13=1 {
+}
+duplex:"duplex_0x6" is imm_29_31=0b011 & imm_13=0 {
+}
+duplex:"duplex_0x7" is imm_29_31=0b011 & imm_13=1 {
+}
+duplex:"duplex_0x8" is imm_29_31=0b100 & imm_13=0 {
+}
+duplex:"duplex_0x9" is imm_29_31=0b100 & imm_13=1 {
+}
+duplex:"duplex_0xa" is imm_29_31=0b101 & imm_13=0 {
+}
+duplex:"duplex_0xb" is imm_29_31=0b101 & imm_13=1 {
+}
+duplex:"duplex_0xc" is imm_29_31=0b110 & imm_13=0 {
+}
+duplex:"duplex_0xd" is imm_29_31=0b110 & imm_13=1 {
+}
+duplex:"duplex_0xe" is imm_29_31=0b111 & imm_13=0 {
+}
+duplex:"duplex_0xf" is imm_29_31=0b111 & imm_13=1 {
+}
 
 slot0: slot is slot &  (parse=0b01 | parse=0b10) { build slot; }
 slot1: slot0 is slot0 { build slot0; }
 slot2: slot0 is slot0 { build slot0; }
 slotX: slot is slot & parse=0b11  { build slot; }
-duplex:"duplex" is imm32 {
-}
-
 slotX: duplex is duplex & parse=0b00  { build duplex; }
 
 :{ slot0 slot1 slotX } is slot0;slot1;slotX {
