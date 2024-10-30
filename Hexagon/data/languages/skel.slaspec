@@ -36,19 +36,22 @@ define token instr (32)
    imm_21_24 = (21, 24)
    imm_21_23 = (21, 23)
    imm_21_22 = (21, 22)
-   imm_21 = (21, 21)
+   imm_21 = (21, 21) signed
 
    imm_20_27 = (20, 27)
+   imm_20_21 = (20, 21)
 
    imm_18_19 = (18, 19)
 
    imm_16_27 = (16, 27)
    imm_16_25 = (16, 25)
-   imm_16_24 = (16, 24)
+   imm_16_24 = (16, 24) signed
    imm_16_23 = (16, 23)
    imm_16_20 = (16, 20)
 
    imm_13 = (13, 13) signed
+
+   imm_12_13 = (12, 13)
    imm_12 = (12, 12)
 
    imm_11_13 = (11, 13)
@@ -87,7 +90,7 @@ define token instr (32)
    imm_2_3 = (2, 3)
    imm_2 = (2, 2)
 
-   imm_1_13 = (1, 13)
+   imm_1_13 = (1, 13) signed
    imm_1_7 = (1, 7)
    imm_1_2 = (1, 2)
 
@@ -101,6 +104,9 @@ define token instr (32)
    imm_0 = (0, 0)
    
 
+   D4_16_19 = (16,19)
+   D4_8_11 = (8,11)
+   S4 = (16,19)
    S2 = (16,17)
    T2 = (8,9)
    D2 = (0,1)
@@ -163,7 +169,7 @@ FP
 LR
  ];
 
-attach variables [ D5 S5 alu_X5 ] [
+attach variables [ D5 S5 alu_X5 T5 ] [
 X0 
 X1 
 X2 
@@ -198,6 +204,24 @@ FP
 LR
 ];
 
+attach variables [ S4 D4_16_19 D4_8_11 ] [
+X0 
+X1 
+X2 
+X3 
+X4 
+X5 
+X6 
+X7 
+X16 
+X17 
+X18 
+X19 
+X20 
+X21 
+X22 
+X23 
+];
 
  define register offset=0x80 size=4 [ 
 SA0
@@ -306,10 +330,10 @@ Addr32i:  is    imm_16_24 & imm_1_13 {
 slot:D5" = add("S5",#"loc")" is iclass=0b1011 & S5 & D5 & imm_21_27 & imm_5_13 [loc= ((imm_21_27 << 9) | (imm_5_13));] {
     D5 = S5 + sext(loc:2);
 } 
-slot:D5" = add("S5","T5")" is iclass=0b1111 & S5 & D5 & imm_21_27=0b0011000 & S5 & imm_13=0 & T5 & imm_5_7=0 {
+slot:D5" = add("S5","T5")" is iclass=0b1111 & D5 & imm_21_27=0b0011000 & S5 & imm_13=0 & T5 & imm_5_7=0 {
     D5 = S5 + T5;
 } 
-slot:D5" = add("S5","T5"):sat" is iclass=0b1111 & S5 & D5 & imm_21_27=0b0011001 & S5 & imm_13=0 & T5 & imm_5_7=0 {
+slot:D5" = add("S5","T5"):sat" is iclass=0b1111 & D5 & imm_21_27=0b0110010 & S5 & imm_13=0 & T5 & imm_5_7=0 {
     #D5 = S5 + T5;
     _stub();
 } 
@@ -432,99 +456,21 @@ with slot: iclass=0b0111 {
 	}
 }
 
-
+# ALU32/PERM
 
 # ALU32/PRED
  with slot: iclass=0b0111 {
     # Compare
-	:D2="cmp.eq"(S5, "num") is Rs = 0 & MajOp=0b101 & imm_22_23=0b00 & imm_21 & S5 & imm_5_13 & imm_2_4=0b000 & D2 {
+	:D2_pred="cmp.eq("S5", "s10")" is Rs = 0 & MajOp=0b101 & imm_22_23=0b00 & imm_21 & S5 & imm_5_13 & imm_2_4=0b000 & D2_pred [s10 = imm_5_13 | (imm_21 << 9);] {
+        if( S5 == s10) goto <good>;
+        D2_pred = -1;
+        goto inst_next;
+        <good>
+        D2_pred = 0;
+        goto inst_next;
 	}  
 
 }
-
-
- # JR / J
- with slot: iclass=0b0101 {
-    # JR
-
-    # call from reg
-	 slot:"callr" S5 is imm_21_27=0b0000101 & S5 & imm_0_13=0b00000000000000 {
-         _stub();
-	 }
-
-	 slot:"if ("U2") callr" S5 is imm_21_27=0b0001000 & S5 & imm_10_13=0 & U2 & imm_0_7=0 {
-         _stub();
-	 }
-	 slot:"if (!"U2") callr" S5 is imm_21_27=0b0001001 & S5 & imm_10_13=0 & U2 & imm_0_7=0 {
-         _stub();
-	 }
-
-
-    # Jump to addr from reg
-	 slot:"jumpr" S5 is imm_21_27=0b0010100 & S5 & imm_0_13=0b00000000000000 {
-		goto [S5];
-	 }
- }
-
-
-     # J
-
- with slot: iclass=0b0101 {
-     # Call subroutine
-    Call_R22: is imm_16_25 & imm_1_13 {
-        local loc:4 = (((imm_16_25 << 13) | (imm_1_13)) << 2);
-        local loc1:3 = loc:3;
-        local loc2:4 = sext(loc1);
-
-        local loc3:4 = loc2 + inst_start;
-        export *:4 loc3;
-      }
-	 slot:"call" Call_R22 is imm_25_27=0b101 & Call_R22 & imm_0=0 {
-        LR = inst_next;
-        call Call_R22;
-	 }
-
-	 slot:"if ("U2") call num" is imm_24_27=0b1101 & imm_22_23 & imm_21=0 & imm_16_20 & imm_13 & imm_12=0 & imm_11=0 & imm_10=0 & U2 & imm_1_7 & imm_0=0 {
-     _stub();
-	 }
-
-	 slot:"if (!"U2") call num" is imm_24_27=0b1101 & imm_22_23 & imm_21=1 & imm_16_20 & imm_13 & imm_12=0 & imm_11=0 & imm_10=0 & U2 & imm_1_7 & imm_0=0 {
-     _stub();
-	 }
-
-
-     # Jump to address
-
-    slot:"J" Addr32i  is imm_25_27=0b100  &  imm_0_1 & Addr32i {
-        goto Addr32i;
-     }
-
-	 slot:"if ("U2") jump:nt num" is  imm_24_27=0b1100 & imm_22_23 & imm_21=0 & imm_16_20 & imm_13 & imm_11_12=0b00 & imm_10=0 & U2 & imm_1_7 & imm_0=0 {
-     _stub();
-	 }
-
-	 slot:"if ("U2") jump:t num" is  imm_24_27=0b1100 & imm_22_23 & imm_21=0 & imm_16_20 & imm_13 & imm_11_12=0b10 & imm_10=0 & U2 & imm_1_7 & imm_0=0 {
-     _stub();
-	 }
-     
-	 slot:"if (!"U2") jump:nt num" is  imm_24_27=0b1100 & imm_22_23 & imm_21=1 & imm_16_20 & imm_13 & imm_11_12=0b00 & imm_10=0 & U2 & imm_1_7 & imm_0=0 {
-     _stub();
-	 }
-
-	 slot:"if (!"U2") jump:t num" is  imm_24_27=0b1100 & imm_22_23 & imm_21=1 & imm_16_20 & imm_13 & imm_11_12=0b10 & imm_10=0 & U2 & imm_1_7 & imm_0=0 {
-     _stub();
-	 }
-
-
-
-#d
-    
- }
-
-# Compare and jump
-#with slot: iclass=0b0001 {
-#}
-
 
 # CR
 with slot: iclass=0b0110 {
@@ -593,7 +539,7 @@ with slot: iclass=0b0110 {
     }
 
     slot:D2_pred"=and("T2_pred", !"S2_pred")" is imm_20_27=0b10110110 & imm_18_19=0 & S2_pred & imm_13=0 & imm_10_12=0 & T2_pred & imm_2_7=0 & D2_pred {
-        D2_pred = T2_pred & ~S2_pred;
+        D2_pred = T2_pred & (~S2_pred);
     }
 
     slot:D2_pred"=or("S2_pred", or("T2_pred","U2_pred"))" is imm_20_27=0b10110111 & imm_18_19=0 & S2_pred & imm_13=0 & imm_10_12=0 & T2_pred & U2_pred & imm_2_5=0 & D2_pred {
@@ -625,19 +571,172 @@ with slot: iclass=0b0110 {
     }
 
     # User control register transfer
-#    slot: D5_ctrl = S5 is imm_21_27=0b0010001 & S5_ctrl & imm_5_13=0 & D5 {
-#        D5_ctrl = S5;
-#    }
-#    slot: "D5_ctrl = S5 (dd/ss)" is imm_21_27=0b0011001 & S5_ctrl & imm_5_13=0 & D5 {
-#        #D5 = S5_ctrl;
-#    }
-#    slot: "D5 = S5_ctrl (dd/ss)" is imm_21_27=0b1000000 & S5_ctrl & imm_5_13=0 & D5 {
-#        #D5 = S5_ctrl;
-#    }
+    slot: D5_ctrl = S5 is imm_21_27=0b0010001 & S5 & imm_5_13=0 & D5_ctrl {
+        D5_ctrl = S5;
+    }
+    slot: "D5_ctrl = S5 (dd/ss)" is imm_21_27=0b0011001 & S5_ctrl & imm_5_13=0 & D5 {
+        _stub();
+        #D5 = S5_ctrl;
+    }
+    slot: "D5 = S5_ctrl (dd/ss)" is imm_21_27=0b1000000 & S5_ctrl & imm_5_13=0 & D5 {
+        _stub();
+        #D5 = S5_ctrl;
+    }
     slot: D5 = S5_ctrl is imm_21_27=0b1010000 & S5_ctrl & imm_5_13=0 & D5 {
         D5 = S5_ctrl;
     }
 }
+
+ # JR
+ define pcodeop hintjr;
+ with slot: iclass=0b0101 {
+    # JR
+
+    # call from reg
+	 slot:"callr" S5 is imm_21_27=0b0000101 & S5 & imm_0_13=0b00000000000000 {
+         _stub();
+	 }
+
+	 slot:"if ("U2") callr" S5 is imm_21_27=0b0001000 & S5 & imm_10_13=0 & U2 & imm_0_7=0 {
+         _stub();
+	 }
+	 slot:"if (!"U2") callr" S5 is imm_21_27=0b0001001 & S5 & imm_10_13=0 & U2 & imm_0_7=0 {
+         _stub();
+	 }
+
+     # Hint indirect jmp
+	 slot:"hintjr("S5")" is imm_21_27=0b0010101 & S5 & imm_0_13=0b00000000000000 {
+        hintjr(S5);
+	 }
+
+
+    # Jump to addr from reg
+	 slot:"jumpr" S5 is imm_21_27=0b0010100 & S5 & imm_0_13=0b00000000000000 {
+		goto [S5];
+	 }
+
+	 slot:"if("U2") jumpr:nt "S5 is imm_21_27=0b0011010 & S5 & imm_13=0 & imm_11_12=0b00 & imm_10=0 & U2 & imm_0_7=0 {
+        _stub();
+	 }
+	 slot:"if("U2".new) jumpr:nt "S5 is imm_21_27=0b0011010 & S5 & imm_13=0 & imm_11_12=0b01 & imm_10=0 & U2 & imm_0_7=0 {
+        _stub();
+	 }
+	 slot:"if("U2") jumpr:t "S5 is imm_21_27=0b0011010 & S5 & imm_13=0 & imm_11_12=0b10 & imm_10=0 & U2 & imm_0_7=0 {
+        _stub();
+	 }
+	 slot:"if("U2".new) jumpr:t "S5 is imm_21_27=0b0011010 & S5 & imm_13=0 & imm_11_12=0b11 & imm_10=0 & U2 & imm_0_7=0 {
+        _stub();
+	 }
+	 slot:"if(!"U2") jumpr:nt "S5 is imm_21_27=0b0011011 & S5 & imm_13=0 & imm_11_12=0b00 & imm_10=0 & U2 & imm_0_7=0 {
+        _stub();
+	 }
+	 slot:"if(!"U2".new) jumpr:nt "S5 is imm_21_27=0b0011011 & S5 & imm_13=0 & imm_11_12=0b01 & imm_10=0 & U2 & imm_0_7=0 {
+        _stub();
+	 }
+	 slot:"if(!"U2") jumpr:t "S5 is imm_21_27=0b0011011 & S5 & imm_13=0 & imm_11_12=0b10 & imm_10=0 & U2 & imm_0_7=0 {
+        _stub();
+	 }
+	 slot:"if(!"U2".new) jumpr:t "S5 is imm_21_27=0b0011011 & S5 & imm_13=0 & imm_11_12=0b11 & imm_10=0 & U2 & imm_0_7=0 {
+        _stub();
+	 }
+ }
+
+
+# J
+with slot: iclass=0b0101 {
+     # Call subroutine
+    Call_R22: is imm_16_25 & imm_1_13 {
+        local loc:4 = (((imm_16_25 << 13) | (imm_1_13)) << 2);
+        local loc1:3 = loc:3;
+        local loc2:4 = sext(loc1);
+
+        local loc3:4 = inst_start + loc2;
+        export  loc3;
+      }
+	 slot:"call" Call_R22 is imm_25_27=0b101 & Call_R22 & imm_0=0 {
+        LR = inst_next;
+        call [Call_R22];
+	 }
+
+	 slot:"if ("U2") call num" is imm_24_27=0b1101 & imm_22_23 & imm_21=0 & imm_16_20 & imm_13 & imm_12=0 & imm_11=0 & imm_10=0 & U2 & imm_1_7 & imm_0=0 {
+     _stub();
+	 }
+
+	 slot:"if (!"U2") call num" is imm_24_27=0b1101 & imm_22_23 & imm_21=1 & imm_16_20 & imm_13 & imm_12=0 & imm_11=0 & imm_10=0 & U2 & imm_1_7 & imm_0=0 {
+     _stub();
+	 }
+ }
+
+     # Compare and jump
+ with slot: iclass=0b0001 {
+     #..
+     slot:"p0=cmp.eq("S4", "imm_8_12"); if (p0.new) jump:nt "r9 is imm_22_27=0b000000 & imm_20_21 & S4 & imm_13=0 & imm_8_12 & imm_1_7 & imm_0=0 [ r9 = imm_1_7 | (imm_20_21 << 7);] {
+        
+     _stub();
+     }
+     #..
+ }
+
+
+# J/Jump to address
+with slot: iclass=0b0101 {
+
+    JImm: loc is imm_16_24 & imm_1_13 [loc = inst_start+(((imm_16_24 << 13) | (imm_1_13)) << 2);]{
+        export *[ram]:4 loc;
+    }
+
+    slot:"J" JImm  is imm_25_27=0b100  &  imm_0=0 & JImm  {
+        goto JImm;
+     }
+    
+    IfImm: r15 is imm_1_7 & imm_13 & imm_16_20 [r15 = inst_start + ((imm_1_7 | (imm_13 << 7) | (imm_16_20 << 8)) << 2);] {
+        export *[ram]:4 r15;
+    }
+
+	 slot:"if ("U2") jump:nt #"IfImm is  imm_24_27=0b1100 & imm_22_23 & imm_21=0 & imm_11_12=0b00 & imm_10=0 & U2 & imm_0=0 & IfImm  {
+         if(U2 != 0) goto IfImm;
+	 }
+
+	 slot:"if ("U2") jump:t num" is  imm_24_27=0b1100 & imm_22_23 & imm_21=0 & imm_16_20 & imm_13 & imm_11_12=0b10 & imm_10=0 & U2 & imm_1_7 & imm_0=0 {
+     _stub();
+	 }
+     
+	 slot:"if (!"U2") jump:nt num" is  imm_24_27=0b1100 & imm_22_23 & imm_21=1 & imm_16_20 & imm_13 & imm_11_12=0b00 & imm_10=0 & U2 & imm_1_7 & imm_0=0 {
+     _stub();
+	 }
+
+	 slot:"if (!"U2") jump:t num" is  imm_24_27=0b1100 & imm_22_23 & imm_21=1 & imm_16_20 & imm_13 & imm_11_12=0b10 & imm_10=0 & U2 & imm_1_7 & imm_0=0 {
+     _stub();
+	 }
+ }
+
+# J/Jump to address cond new
+with slot: iclass=0b0101 {
+	 slot:"if ("U2".new) jump:nt num" is imm_24_27=0b1100 & imm_22_23 & imm_21=0 & imm_16_20 & imm_13 & imm_11_12=0b01 & imm_10=0 & U2 & imm_1_7 & imm_0=0 {
+     _stub();
+	 }
+	 slot:"if ("U2".new) jump:t num" is imm_24_27=0b1100 & imm_22_23 & imm_21=0 & imm_16_20 & imm_13 & imm_11_12=0b11 & imm_10=0 & U2 & imm_1_7 & imm_0=0 {
+     _stub();
+	 }
+	 slot:"if (!"U2".new) jump:nt num" is imm_24_27=0b1100 & imm_22_23 & imm_21=1 & imm_16_20 & imm_13 & imm_11_12=0b01 & imm_10=0 & U2 & imm_1_7 & imm_0=0 {
+     _stub();
+	 }
+	 slot:"if (!"U2".new) jump:t num" is imm_24_27=0b1100 & imm_22_23 & imm_21=1 & imm_16_20 & imm_13 & imm_11_12=0b11 & imm_10=0 & U2 & imm_1_7 & imm_0=0 {
+     _stub();
+	 }
+}
+# J/Jump to address cond reg
+
+# J/Transfer and jump
+with slot: iclass=0b0001 {
+	 slot:D4_16_19"=num; jump num" is imm_24_27=0b0110 & imm_22_23=0 & imm_20_21 & D4_16_19 & imm_8_13 & imm_1_7 & imm_0=0 {
+     _stub();
+	 }
+	 slot:D4_8_11"="S4"; jump num" is imm_24_27=0b0111 & imm_22_23=0 & imm_20_21 & S4 & imm_12_13=0 & D4_8_11 & imm_1_7 & imm_0=0 {
+     _stub();
+	 }
+}
+
 
 # LD
 with slot: iclass=0b1001 {
@@ -786,13 +885,13 @@ with slot: iclass=0b1000 {
 # Shift by imm and acc
 # ..
     :alu_X5"+=lsr("S5",#"imm_8_13")" is imm_22_27=0b001000 & imm_21=0 & S5 & imm_8_13 & imm_5_7=0b101 & alu_X5 {
-        alu_X5 = alu_X5 + S5 >> imm_8_13;
+        alu_X5 = alu_X5 + (S5 >> imm_8_13);
         _stub();
         #TODO: chk this, might be a pair
     }
 
     :alu_X5"+=lsr("S5",#"imm_8_12")" is imm_22_27=0b111000 & imm_21=0 & S5 & imm_13=0 & imm_8_12 & imm_5_7=0b101 & alu_X5 {
-        alu_X5 = alu_X5 + S5 >> imm_8_12;
+        alu_X5 = alu_X5 + (S5 >> imm_8_12);
     }
 #..
 
