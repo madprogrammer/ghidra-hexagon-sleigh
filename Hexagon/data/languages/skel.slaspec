@@ -14,6 +14,35 @@ define alignment=4;
 define space ram     type=ram_space      size=4 wordsize=1 default;
 define space register type=register_space size=4;
 
+define token instr64 (64)
+    # imm64 = second word
+    # immw = first word
+   parsew = (14, 15)
+   parse64 = (46, 48)
+   iclass64     = (60,63)
+   
+   imm64_27 = (27, 27)
+
+   imm64_25_26 = (25, 26) signed
+
+   imm64_22_23 = (54, 55)
+
+   imm64_21_24 = (21, 24)
+   imm64_21 = (53, 53)
+
+   imm64_16_20 = (48, 52)
+
+   imm64_5_13 = (37, 45) signed
+
+   Rs64 = (59, 59)
+   MajOp64 = (56,58)
+
+   S564 = (16,20)
+   D564 = (32,36)
+
+   iclassw = (28, 31)
+;
+
 define token instr (32)
    iclass     = (28,31)
 
@@ -26,6 +55,7 @@ define token instr (32)
 
    imm_24_27 = (24, 27)
 
+   imm_23_27 = (23, 27)
    imm_23_24 = (23, 24)
    imm_23 = (23, 23)
 
@@ -99,6 +129,7 @@ define token instr (32)
    imm_0_9 = (0, 9)
    imm_0_7 = (0, 7) signed
    imm_0_6 = (0, 6)
+   imm_0_4 = (0, 4)
    imm_0_2 = (0, 2)
    imm_0_1 = (0, 1)
    imm_0 = (0, 0)
@@ -123,8 +154,11 @@ define token instr (32)
    MajOp = (24,26)
    MinOp = (21,23)
    D7 = (0,7)
+   D7_svctrl = (0,7)
    D5 = (0,4)
    D5_ctrl = (0,4)
+   S7 = (16,22)
+   S7_svctrl = (16,22)
    S5 = (16,20)
    S5_ctrl = (16,20)
    alu_X5 = (16,20)
@@ -433,6 +467,15 @@ with slot: iclass=0b0111 {
 		D5 = TI_S16;
 	}  
 }
+# Special case for constant extender
+wslot:"extD5=num" is iclass64=0b0111 & Rs64=1 & MajOp64=0b000 & imm64_21=0 &  D564 & imm64_22_23 & imm64_16_20 & imm64_5_13
+{
+_stub();
+}
+# Special case for const extender
+#wslot:"CEXT:"D5"="TI_S16 is iclass=0b0000; iclass=0b0111 & Rs = 1 & MajOp=0b000 & imm_21=0 & TI_S16 & D5 {
+#    D5 = TI_S16;
+#}  
 
 
 # ALU32/ALU:trans_reg
@@ -456,7 +499,38 @@ with slot: iclass=0b0111 {
 	}
 }
 
-# ALU32/PERM
+# ALU32/PERM:Combine words
+with slot: iclass=0b0111 {
+    :D5="comb0(" is Rs=0 & MajOp=0b011 & imm_23=0 & imm_21_22=0b00 & S5 & imm_13=1 & imm_5_12 & D5 {
+        _stub();
+    }
+    :D5="comb1(" is Rs=0 & MajOp=0b011 & imm_23=0 & imm_21_22=0b01 & S5 & imm_13=1 & imm_5_12 & D5 {
+        _stub();
+    }
+    :D5="comb2(" is Rs=1 & MajOp=0b100 & imm_23=0 & imm_16_22 & imm_13 & imm_5_12 & D5 {
+        _stub();
+    }
+    :D5="comb3(" is Rs=1 & MajOp=0b100 & imm_23=1 & imm_21_22=0 & imm_16_20 & imm_13 & imm_5_12 & D5 {
+        _stub();
+    }
+}
+with slot: iclass=0b1111 {
+    :D5="comb4(" is Rs=0 & MajOp=0b011 & MinOp=0b100 & S5 & imm_13 & T5 & imm_5_7=0 & D5 {
+        _stub();
+    }
+    :D5="comb5(" is Rs=0 & MajOp=0b011 & MinOp=0b101 & S5 & imm_13 & T5 & imm_5_7=0 & D5 {
+        _stub();
+    }
+    :D5="comb6(" is Rs=0 & MajOp=0b011 & MinOp=0b110 & S5 & imm_13 & T5 & imm_5_7=0 & D5 {
+        _stub();
+    }
+    :D5="comb7(" is Rs=0 & MajOp=0b011 & MinOp=0b111 & S5 & imm_13 & T5 & imm_5_7=0 & D5 {
+        _stub();
+    }
+    :D5="comb8(" is Rs=0 & MajOp=0b101 & imm_23=0 & imm_21_22=0 & S5 & imm_13 & T5 & imm_5_7=0 & D5 {
+        _stub();
+    }
+}
 
 # ALU32/PRED
  with slot: iclass=0b0111 {
@@ -739,9 +813,14 @@ with slot: iclass=0b0001 {
 
 
 # LD
+    # Special case for constant extender
+    wslot:"D5=memw__EXT(S5+#s11)" is iclass64=0b110 & imm64_27=0 & imm64_25_26 & imm64_21_24=0b1100 & S564 & imm64_5_13 & D564 {
+    _stub();
+    }
+
 with slot: iclass=0b1001 {
     # Load word
-    slot:D5"=memw("S5"+#"s11")" is imm_27=0 & imm_25_26 & imm_21_24=0b1100 & S5 & imm_5_13 & D5 [s11 = (imm_5_13 | (imm_25_26 << 9))<<2;] {
+    :D5"=memw("S5"+#"s11")" is imm_27=0 & imm_25_26 & imm_21_24=0b1100 & S5 & imm_5_13 & D5 [s11 = (imm_5_13 | (imm_25_26 << 9))<<2;] {
         local tmp:2 = s11 << 3;
         local tmp1:2 = tmp s>> 3;
         local EA:4 = S5 + sext(tmp1);
@@ -802,19 +881,65 @@ with slot: iclass=0b0011 {
 }
 
 
-# ST
+# ST:Store word
+with slot: iclass=0b0011 {
+    :"memw("S5"+"T5"<<u2)=T5" is imm_21_27=0b1011100 & S5 & imm_13 & T5 & imm_7 & imm_5_6=0 & imm_0_4 { #  [s11 = (imm_0_7 | (imm_13 << 8) | (imm_16_20 << 9) | (imm_25_26 << 14)) << 2;] {
+        #local tmp:2 = s11 << 3;
+        #local tmp1:2 = tmp s>> 3;
+        #local EA:4 = GP + sext(tmp1);
+        #*[ram]:4 EA = T5;
+        _stub();
+    }
+    :"memw("S5" + s11)=s8" is imm_25_27=0b110 & imm_23_24=0 & imm_21_22=0b10 & S5 & imm_13 & imm_7_12 & imm_0_6 { #  [s11 = (imm_0_7 | (imm_13 << 8) | (imm_16_20 << 9) | (imm_25_26 << 14)) << 2;] {
+        #local tmp:2 = s11 << 3;
+        #local tmp1:2 = tmp s>> 3;
+        #local EA:4 = GP + sext(tmp1);
+        #*[ram]:4 EA = T5;
+        _stub();
+    }
+}
+with slot: iclass=0b0100 {
+    :"memw(gp + "s11")="T5 is imm_27=0 & imm_25_26 & imm_21_24=0b010 & imm_16_20 & imm_13 & T5 & imm_0_7 [s11 = (imm_0_7 | (imm_13 << 8) | (imm_16_20 << 9) | (imm_25_26 << 14)) << 2;] {
+        local tmp:2 = s11 << 3;
+        local tmp1:2 = tmp s>> 3;
+        local EA:4 = GP + sext(tmp1);
+        *[ram]:4 EA = T5;
+    }
+}
 with slot: iclass=0b1010 {
-    # Store word
-
-    slot:"memw("S5" + "s11")="T5 is imm_27=0 & imm_25_26 & imm_21_24=0b1100 & S5 & imm_13 & T5 & imm_0_7 [s11 = (imm_0_7 | (imm_13 << 8) | (imm_25_26 << 9)) << 2;] {
+    :"memw("S5" + "s11")="T5 is imm_27=0 & imm_25_26 & imm_21_24=0b1100 & S5 & imm_13 & T5 & imm_0_7 [s11 = (imm_0_7 | (imm_13 << 8) | (imm_25_26 << 9)) << 2;] {
         local tmp:2 = s11 << 3;
         local tmp1:2 = tmp s>> 3;
         local EA:4 = S5 + sext(tmp1);
         *[ram]:4 EA = T5;
     }
+    :"memw(X5 ++ I:circ(Mu))="T5 is imm_21_27=0b1001100 & X5 & imm_13 & T5 & imm_7=0 & imm_2_6=0 & imm_1=1 & imm_0=0 {
+        _stub();
+    }
+    :"memw(X5 ++ s4:2:circ(Mu))="T5 is imm_21_27=0b1001100 & X5 & imm_13 & T5 & imm_7=0 & imm_2_6=0 & imm_1=0 & imm_0=0 {
+        _stub();
+    }
+    :"memw(Re=U6)="T5 is imm_21_27=0b1011100 & X5 & imm_13=0 & T5 & imm_7=1 & imm_6=0 & imm_0_6  {
+        _stub();
+    }
+    :"memw(Rx++s4:2)="T5 is imm_21_27=0b1011100 & X5 & imm_13=0 & T5 & imm_7=0 & imm_3_6 & imm_2=0 & imm_1=0 & imm_0=0  {
+        _stub();
+    }
+    :"memw(Ru<<u2+u6)="T5 is imm_21_27=0b1101100 & imm_16_20 & imm_13 & T5 & imm_7=1 & imm_6 & imm_0_5  {
+        _stub();
+    }
+    :"memw(Rx++Mu)="T5 is imm_21_27=0b1101100 & X5 & imm_13 & T5 & imm_7=0 & imm_0_6=0 {
+        _stub();
+    }
+    :"memw(Rx++Mu:brev)="T5 is imm_21_27=0b1111100 & X5 & imm_13 & T5 & imm_7=0 & imm_0_6=0 {
+        _stub();
+    }
+}
 
+# ST:Allocate stack frame
+with slot: iclass=0b1010 {
 
-    slot:"allocframe("S5","U11"):raw" is imm_21_27=0b0000100 & S5 & imm_11_13=0b000 & imm_0_10 [ U11 = imm_0_10 << 3; ] {
+    :"allocframe("S5","U11"):raw" is imm_21_27=0b0000100 & S5 & imm_11_13=0b000 & imm_0_10 [ U11 = imm_0_10 << 3; ] {
         local EA:4 = S5 - 8;
         local lr_8:8 = zext(LR);
         local fp_8:8 = zext(FP);
@@ -823,8 +948,8 @@ with slot: iclass=0b1010 {
         S5 = EA - U11;
     }
 }
-with slot: iclass=0b0011 {
 
+with slot: iclass=0b0011 {
 
     slot:"memw("S5"+"U6"=#"S8")" is imm_25_27=0b110 & imm_23_24=0 & imm_21_22=0b10 & S5 & imm_7_12 & imm_0_6 & imm_13 [ U6 = imm_7_12 << 2; S8=imm_0_6 | (imm_13 << 8);] {
         local EA:4 = S5 + U6;
@@ -857,6 +982,28 @@ slot:"ickill" is iclass=0b0101 & imm_21_27=0b0110110 & imm_16_20=0 & imm_11_13=0
 	ickill();
 }
 
+#SYSTEM/MONITOR:Control register trans
+with slot: iclass=0b0110 {
+    slot:D7_svctrl"="S5 is imm_22_27=0b011100 & imm_21=0 & S5 & imm_7_12=0 & D7_svctrl {
+        _stub();
+    }
+    slot:"Sdd=Rss" is imm_22_27=0b110100 & imm_21=0 & S5 & imm_7_12=0 & D7_svctrl {
+        _stub();
+    }
+    slot:D5"="S7_svctrl is imm_23_27=0b11101 & S7_svctrl & imm_5_13=0 & D5 {
+        _stub();
+    }
+    slot:D5"="S7_svctrl is imm_23_27=0b11110 & S7_svctrl & imm_5_13=0 & D5 {
+        _stub();
+    }
+}
+#SYSTEM/MONITOR:Wait mode
+define pcodeop wait;
+with slot: iclass=0b0110 {
+    slot:"wait("S5")" is imm_21_27=0b0100010 & S5 & imm_8_13=0 & imm_5_7=0b000 & imm_0_4=0 {
+        wait(S5);
+    }
+}
 
 # XTYPE - pain starts here
 # XTYPE/BIT
@@ -938,12 +1085,22 @@ duplex:"duplex_0xe" is imm_29_31=0b111 & imm_13=0 {
 duplex:"duplex_0xf" is imm_29_31=0b111 & imm_13=1 {
 }
 
-slot0: slot is slot &  (parse=0b01 | parse=0b10) { build slot; }
+
+# special contant extender handling
+#slot:"Cext" is iclass=0b0000 {
+#_stub();
+#}
+
+slot0: slot is slot &  (parse=0b01 | parse=0b10) & iclass!=0b0000{ build slot; }
 slot1: slot0 is slot0 { build slot0; }
 slot2: slot0 is slot0 { build slot0; }
 slotX: slot is slot & parse=0b11  { build slot; }
 slotX: duplex is duplex & parse=0b00  { build duplex; }
 
+:{ slot0 slotX } is slot0;slotX {
+	build slot0;
+	build slotX;
+}
 :{ slot0 slot1 slotX } is slot0;slot1;slotX {
 	build slot0;
 	build slot1;
@@ -956,13 +1113,41 @@ slotX: duplex is duplex & parse=0b00  { build duplex; }
 	build slotX;
 }
 
-#:{{ slot0 }} is slot0 {
-#build slot0;
-#}
-
 :{ slotX } is slotX {
 	build slotX;
 } 
+
+wslot0:wslot is wslot & iclassw=0b0000 & (parsew=0b01 | parsew=0b10) & (parse64=0b10 | parse64=0b01) { build wslot; }
+wslotX: wslot is wslot & iclassw=0b0000 & (parsew=0b01 | parsew=0b10) & parse64=0b11 { build wslot; }
+
+:{ wslotX } is wslotX {
+	build wslotX;
+} 
+
+:{ wslot0 wslotX } is wslot0; wslotX {
+	build wslot0;
+	build wslotX;
+} 
+
+:{ wslot0 slot0 slotX } is wslot0; slot0; slotX {
+	build wslot0;
+	build slot0;
+	build slotX;
+} 
+
+:{ wslot0 slotX } is wslot0; slotX {
+	build wslot0;
+	build slotX;
+} 
+
+#:{ wslot0 } is wslot0 {
+#	build wslot0;
+#} 
+
+#wslotX: wslot is wslot & (parse_0=0b01 | parse_0=0b10) & parse_1=0b11 { build wslot; }
+#:{ wslotX } is wslotX {
+#	build wslotX;
+#} 
 
 #define register offset=0x00 size=1 [ Rd ];
 
