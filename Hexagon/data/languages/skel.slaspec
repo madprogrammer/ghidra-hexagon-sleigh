@@ -1397,11 +1397,124 @@ with slot: iclass=0b0110 {
     }
 }
 
+#SYSTEM/USER:Load locked
+with slot: iclass=0b1001 {
+    slot:"wllck" is imm_21_27=0b0010000 & S5 & imm_12_13=0b00 & imm_5_11=0 & D5 {
+_stub();
+    }
+    slot:"rllck" is imm_21_27=0b0010000 & S5 & imm_12_13=0b01 & imm_5_11=0 & D5 {
+_stub();
+    }
+}
+
+#SYSTEM/USER:Store locked
+with slot: iclass=0b1010 {
+    slot:"wllckst" is imm_21_27=0b0000101 & S5 & imm_13=0 & T5 & imm_2_7=0 & D2 {
+_stub();
+    }
+    slot:"dllckst" is imm_21_27=0b0000111 & S5 & imm_13=0 & T5 & imm_2_7=0 & D2 {
+_stub();
+    }
+}
+
+#SYSTEM/USER:Zero cache line
+define pcodeop dcache_zero_addr;
+with slot: iclass=0b1010 {
+    slot:"dczeroa("S5")" is imm_21_27=0b0000110 & S5 & imm_13=0 & imm_0_12=0 {
+dcache_zero_addr(S5);
+    }
+}
+
+#SYSTEM/USER:barrier
+define pcodeop barrier;
+with slot: iclass=0b1010 {
+    slot:"barrier" is imm_21_27=0b1000000 & imm_16_20=0 & imm_0_13=0 {
+barrier();
+    }
+}
+
 #SYSTEM/USER:Breakpoint
 define pcodeop brkpt;
 with slot: iclass=0b0110 {
     slot:"brkpt" is imm_21_27=0b1100001 & imm_16_20=0 & imm_8_13=0 & imm_5_7=0b000 & imm_0_4=0 {
         brkpt();
+    }
+}
+
+#SYSTEM/USER:Data cache prefetch
+define pcodeop dcache_fetch;
+with slot: iclass=0b0110 {
+    slot:"brkpt" is imm_21_27=0b0100000 & S5 & imm_13=0 & imm_11_12=0 & imm_0_10 {
+        dcache_fetch(imm_0_10<<3);
+    }
+}
+
+#SYSTEM/USER:Data cache maintain
+define pcodeop dcache_clean_addr;
+define pcodeop dcache_cleaninv_addr;
+define pcodeop dcache_inv_addr;
+with slot: iclass=0b1010 {
+    :"dccleana("S5")" is imm_21_27=0b0000000 & S5 & imm_0_13=0  {
+        dcache_clean_addr(S5);
+    }
+    :"dccleaninva("S5")" is imm_21_27=0b0000001 & S5 & imm_0_13=0  {
+        dcache_cleaninv_addr(S5);
+    }
+    :"dcinva("S5")" is imm_21_27=0b0000010 & S5 & imm_0_13=0  {
+        dcache_inv_addr(S5);
+    }
+}
+
+#SYSTEM/USER:Icache maintain
+define pcodeop icache_inv_addr;
+with slot: iclass=0b1010 {
+    :"icinva("S5")" is imm_21_27=0b0110110 & S5 & imm_11_13=0b000 & imm_0_10=0  {
+        icache_inv_addr(S5);
+    }
+}
+
+
+#SYSTEM/USER:Isync
+define pcodeop memory_synch;
+with slot: iclass=0b0101 {
+    :"isync" is imm_17_27=0b011111000000 & S5 & imm_13=0 & imm_10_12=0 & imm_0_9=0b0000000010  {
+        memory_synch(S5);
+    }
+}
+
+#SYSTEM/USER:L2 fetch todo
+define pcodeop l2fetch;
+with slot: iclass=0b1010 {
+    :"l2fetch0" is imm_21_27=0b0110000 & S5 & imm_13=0 & T5 & imm_0_7=0 {
+        l2fetch(S5, T5);
+    }
+    :"l2fetch1" is imm_21_27=0b0110100 & S5 & imm_13=0 & T5 & imm_0_7=0 {
+	_stub();
+    }
+}
+
+
+#SYSTEM/USER:pause
+define pcodeop pause;
+with slot: iclass=0b0101 {
+    :"isync" is imm_22_27=0b010001 & imm_16_21=0 & imm_13=0 & imm_8_12 & imm_5_7=0 & imm_2_4 & imm_0_1=0  {
+        pause();
+    }
+}
+
+#SYSTEM/USER:mem thread sync
+define pcodeop syncht;
+with slot: iclass=0b1010 {
+    :"isync" is imm_22_27=0b1000010 & imm_16_21=0 & imm_0_13=0 {
+        syncht();
+    }
+}
+
+#SYSTEM/USER:trace
+define pcodeop trace;
+with slot: iclass=0b0110 {
+    :"isync" is imm_21_27=0b0010010 & S5 & imm_0_13=0 {
+        trace(S5);
     }
 }
 
