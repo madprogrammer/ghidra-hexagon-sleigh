@@ -34,6 +34,25 @@
     	<range space="register" first="0x0000" last="0xffff"/>
   	</global>
   	
+  	<prefersplit style="inhalf">
+    	<register name="X0X1"/>
+    	<register name="X2X3"/>
+    	<register name="X4X5"/>
+    	<register name="X6X7"/>
+    	<register name="X8X9"/>
+    	<register name="X10X11"/>
+    	<register name="X12X13"/>
+    	<register name="X14X15"/>
+    	<register name="X16X17"/>
+    	<register name="X18X19"/>
+    	<register name="X20X21"/>
+    	<register name="X22X23"/>
+    	<register name="X24X25"/>
+    	<register name="X26X27"/>
+    	<register name="X28SP"/>
+    	<register name="FPLR"/>
+    </prefersplit>
+  	
   	<returnaddress>
     	<register name="LR" />
   	</returnaddress>
@@ -83,13 +102,11 @@
         <register name="X26" />
         
         
-        <register name="LR" />
+        <!-- <register name="LR" /> -->
         <register name="SP" />
         <register name="FP" />
         
-        
-        
-        <register name="FP" />
+        <register name="P0" />
       </unaffected>
       <killedbycall>
         <register name="X0" />
