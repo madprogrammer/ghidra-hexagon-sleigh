@@ -18,6 +18,12 @@ define space register type=register_space size=4;
 define token instr64 (64)
     # imm64 = second word
     # immw = first word
+   uimmw_hi = (16, 27)
+   uimmw_lo = (0, 13)
+
+   immw_hi = (16, 27) signed
+   immw_lo = (0, 13) signed
+
    parsew = (14, 15)
    parse64 = (46, 47)
    iclass64     = (60,63)
@@ -26,20 +32,21 @@ define token instr64 (64)
 
    imm64_25_26 = (57, 58) signed
 
-   imm64_22_23 = (54, 55)
+   imm64_22_23 = (54, 55) signed
    
 	imm64_21_27 = (53, 59)
    imm64_21_24 = (53, 56)
    imm64_21 = (53, 53)
 
 	imm64_16_27 = (48, 59)
-   imm64_16_20 = (48, 52)
+   imm64_16_20 = (48, 52) signed
    
    imm64_13 = (45, 45)
 
    imm64_5_13 = (37, 45) signed
    imm64_5_6 = (37, 38) signed
    imm64_7_12 = (39, 44) signed
+   uimm64_7_12 = (39, 44)
 
    Rs64 = (59, 59)
    MajOp64 = (56,58)
@@ -306,7 +313,7 @@ FP
 LR
  ];
 
-attach variables [ D5 S5 alu_X5 T5 ] [
+attach variables [ D5 D564 S5 alu_X5 T5 ] [
 X0 
 X1 
 X2 
@@ -576,9 +583,9 @@ with slot: iclass=0b0111 {
 	}  
 }
 # Special case for constant extender
-wslot:"extD5=num" is iclass64=0b0111 & Rs64=1 & MajOp64=0b000 & imm64_21=0 &  D564 & imm64_22_23 & imm64_16_20 & imm64_5_13
+wslot:"immext #"v" "D564"=#"v1 is immw_hi & immw_lo & iclass64=0b0111 & Rs64=1 & MajOp64=0b000 & imm64_21=0 &  D564 & imm64_22_23 & imm64_16_20 & imm64_5_13 [ v = (imm64_5_13) | (imm64_16_20 << 9) | (imm64_22_23 << 14) | (immw_lo << 6) | (immw_hi << 19); v1=v;]
 {
-_stub();
+    D564 = v:4;
 }
 
 
@@ -843,14 +850,14 @@ with slot: iclass=0b0110 {
 
 # CR:Pc add
 with slot: iclass=0b0110 {
-    :"pcadd" is imm_16_27=0b101001001001 & imm_13=0 & imm_7_12 & imm_5_6=0 & D5 {
-        _stub();
+    :D5"=add(pc,#"imm_7_12")" is imm_16_27=0b101001001001 & imm_13=0 & imm_7_12 & imm_5_6=0 & D5 {
+        D5 = inst_start + imm_7_12;
     }
 }
 # const ext 
-wslot:"w pc add" is iclass64=0b0110  & imm64_27=1 & imm64_16_27=0b101001001001 & imm64_13=0 & imm64_7_12 & imm64_5_6=0 & D564
+wslot:D564"=add(pc,#"v")" is uimmw_hi & uimmw_lo & iclass64=0b0110  & imm64_27=1 & imm64_16_27=0b101001001001 & imm64_13=0 & uimm64_7_12 & imm64_5_6=0 & D564 [ v = (uimm64_7_12) | (uimmw_lo << 6) | (uimmw_hi << 19);]
 {
-_stub();
+        D564 = inst_start + v;
 }
 
 # CR:Pipelined loop
@@ -982,7 +989,8 @@ with slot: iclass=0b0110 {
 	 }
 
 	 slot:"if("U2") jumpr:nt "S5 is imm_21_27=0b0011010 & S5 & imm_13=0 & imm_11_12=0b00 & imm_10=0 & U2 & imm_0_7=0 {
-        _stub();
+        if(U2 == 0) goto inst_next;
+        goto [S5];
 	 }
 	 slot:"if("U2".new) jumpr:nt "S5 is imm_21_27=0b0011010 & S5 & imm_13=0 & imm_11_12=0b01 & imm_10=0 & U2 & imm_0_7=0 {
         _stub();

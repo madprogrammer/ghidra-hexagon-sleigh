@@ -53,9 +53,11 @@
     	<register name="FPLR"/>
     </prefersplit>
   	
+  	<!--
   	<returnaddress>
     	<register name="LR" />
   	</returnaddress>
+  	-->
   	
   	
   	<default_proto>
