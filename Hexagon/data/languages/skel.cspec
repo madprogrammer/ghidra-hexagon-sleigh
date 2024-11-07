@@ -27,6 +27,7 @@
 		</size_alignment_map>
   	</data_organization>
 	<stackpointer register="SP" space="ram"/>
+	<spacebase name="FP" register="FP" space="ram"/>
 	<funcptr align="4" />
   
   	<global>
@@ -53,11 +54,9 @@
     	<register name="FPLR"/>
     </prefersplit>
   	
-  	<!--
   	<returnaddress>
     	<register name="LR" />
   	</returnaddress>
-  	-->
   	
   	
   	<default_proto>
@@ -69,6 +68,7 @@
         <pentry minsize="1" maxsize="4">
           <register name="X1" />
         </pentry>
+        
         <pentry minsize="1" maxsize="4">
           <register name="X2" />
         </pentry>
@@ -81,6 +81,7 @@
         <pentry minsize="1" maxsize="4">
           <register name="X5" />
         </pentry>
+        
         <pentry minsize="1" maxsize="500" align="4">
           <addr offset="0" space="stack" />
         </pentry>
@@ -91,6 +92,7 @@
         </pentry>
       </output>
       <unaffected>
+      
         <register name="X16" />
         <register name="X17" />
         <register name="X18" />
@@ -104,14 +106,12 @@
         <register name="X26" />
         
         
-        <!-- <register name="LR" /> -->
+        <register name="LR" />
         <register name="SP" />
         <register name="FP" />
-        
-        <register name="P0" />
       </unaffected>
       <killedbycall>
-        <register name="X0" />
+          
         
         <register name="X6" />
         <register name="X7" />
