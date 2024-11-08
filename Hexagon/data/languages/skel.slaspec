@@ -1562,7 +1562,35 @@ with slot: iclass=0b0101 {
      _stub();
 	 }
 }
+
 # J/Jump to address cond reg
+with slot: iclass=0b0110 {
+	 :"jreg0" is imm_22_27=0b000100 & imm_21 & S5 & imm_13 & imm_12=0 & imm_1_11 & imm_0=0 {
+     _stub();
+	 }
+	 :"jreg1" is imm_22_27=0b000100 & imm_21 & S5 & imm_13 & imm_12=1 & imm_1_11 & imm_0=0 {
+     _stub();
+	 }
+
+	 :"jreg2" is imm_22_27=0b000101 & imm_21 & S5 & imm_13 & imm_12=0 & imm_1_11 & imm_0=0 {
+     _stub();
+	 }
+	 :"jreg3" is imm_22_27=0b000101 & imm_21 & S5 & imm_13 & imm_12=1 & imm_1_11 & imm_0=0 {
+     _stub();
+	 }
+	 :"jreg4" is imm_22_27=0b000110 & imm_21 & S5 & imm_13 & imm_12=0 & imm_1_11 & imm_0=0 {
+     _stub();
+	 }
+	 :"jreg5" is imm_22_27=0b000110 & imm_21 & S5 & imm_13 & imm_12=1 & imm_1_11 & imm_0=0 {
+     _stub();
+	 }
+	 :"jreg6" is imm_22_27=0b000111 & imm_21 & S5 & imm_13 & imm_12=0 & imm_1_11 & imm_0=0 {
+     _stub();
+	 }
+	 :"jreg7" is imm_22_27=0b000111 & imm_21 & S5 & imm_13 & imm_12=1 & imm_1_11 & imm_0=0 {
+     _stub();
+	 }
+ }
 
 # J/Transfer and jump
 with slot: iclass=0b0001 {
@@ -1846,14 +1874,44 @@ with slot: iclass=0b0011 {
 
 
 # ST:Store dword
-# ..
+with slot: iclass=0b0011 {
+    :"memd0" is imm_21_27=0b1011110 & S5 & imm_13 & T5 & imm_7 & imm_5_6=0 & D5  {
+	    _stub();
+    }
+}
+with slot: iclass=0b0100 {
+    :"memd1" is imm_27=1 & imm_25_26 & imm_21_24=0b0110 & imm_16_20 & imm_13 & T5 & imm_0__7 {
+	    _stub();
+    }
+}
 with slot: iclass=0b1010 {
     :"memd("S5"+#"s11")="T5_pair is imm_27=0 & imm_25_26 & imm_21_24=0b1110 & S5 & imm_13 & T5_pair & imm_0_7 [ s11 = ((imm_0_7) | (imm_13 << 8) | (imm_25_26 << 9)) << 3;] {
         local EA:4 = S5 + s11;
         *[ram]:8 EA = T5_pair;
     }
+
+     :"memd3" is imm_21_27=0b1001110 & S5 & imm_13 & T5 & imm_7=0 & imm_2_6=0 & imm_1=1 & imm_0=0 {
+	    _stub();
+     }
+     :"memd4" is imm_21_27=0b1001110 & S5 & imm_13 & T5 & imm_7=0 & imm_3_6 & imm_2=0 & imm_1=0 & imm_0=0 {
+	    _stub();
+     }
+     :"memd5" is imm_21_27=0b1011110 & S5 & imm_13=0 & T5 & imm_7=1 & imm_6=0 & imm_0_5 {
+	    _stub();
+     }
+     :"memd6" is imm_21_27=0b1011110 & S5 & imm_13=0 & T5 & imm_7=0 & imm_3_6 & imm_2=0 & imm_1=0 & imm_0=0 {
+	    _stub();
+     }
+     :"memd7" is imm_21_27=0b1101110 & S5 & imm_13 & T5 & imm_7=1 & imm_6 & imm_0_5 {
+	    _stub();
+     }
+     :"memd8" is imm_21_27=0b1101110 & S5 & imm_13 & T5 & imm_7=0 & imm_0_6=0 {
+	    _stub();
+     }
+     :"memd9" is imm_21_27=0b1111110 & S5 & imm_13 & T5 & imm_7=0 & imm_0_6=0 {
+	    _stub();
+     }
 }
-# ..
 
 # ST:Store rel dw
 with slot: iclass=0b0101 {
@@ -2069,6 +2127,21 @@ with slot: iclass=0b1010 {
     }
 }
 
+#SYSTEM/GUEST:GCRT
+with slot: iclass=0b0110 {
+    :"gcrt0" is imm_21_27=0b0010000 & S5 & imm_5_13=0 & D5 {
+   	_stub();
+    }
+    :"gcrt1" is imm_21_27=0b0011000 & S5 & imm_5_13=0 & D5 {
+   	_stub();
+    }
+    :"gcrt3" is imm_21_27=0b1000001 & S5 & imm_5_13=0 & D5 {
+   	_stub();
+    }
+    :"gcrt4" is imm_21_27=0b1010001 & S5 & imm_5_13=0 & D5 {
+   	_stub();
+    }
+}
 
 
 #SYSTEM/MONITOR:Clr int
@@ -2078,15 +2151,27 @@ with slot: iclass=0b0110 {
         ciad(S5);
     }
 }
+
 #SYSTEM/MONITOR:Swp sgp
+with slot: iclass=0b0110 {
+    :"crswap("S5",sgp0)" is imm_21_27=0b0101000 & S5 & imm_0_13=0 {
+    _stub();
+    }
+    :"crswap("S5",sgp1)" is imm_21_27=0b0101001 & S5 & imm_0_13=0 {
+    _stub();
+    }
+    :"crswap("S5_pair",sgp1:0)" is imm_22_27=0b110110 & imm_21=0 & S5_pair & imm_5_13=0 & imm_0_4=0b00000 {
+    _stub();
+    }
+}
 
 #SYSTEM/MONITOR:Cancel pend
-#define pcodeop cswi;
-#with slot: iclass=0b0110 {
-#    :"cswi("S5")" is imm_21_27=0b0100000 & S5 & imm_8_13=0 & imm_5_7=0b001 & imm_0_4=0 {
-#        ciad(S5);
-#    }
-#}
+define pcodeop cswi;
+with slot: iclass=0b0110 {
+    :"cswi("S5")" is imm_21_27=0b0100000 & S5 & imm_8_13=0 & imm_5_7=0b001 & imm_0_4=0 {
+        ciad(S5);
+    }
+}
 
 #SYSTEM/MONITOR:Data cache kil
 define pcodeop dckill;
@@ -2095,6 +2180,23 @@ slot:"dckill" is iclass=0b1010 & imm_21_27=0b0010000 & imm_16_20=0 & imm_0_13=0 
 }
 
 #SYSTEM/MONITOR:Data cache mon
+with slot: iclass=0b1010 {
+    :"dcachemon0" is imm_21_27=0b0010001 & S5 & imm_0_13=0 {
+    _stub();
+    }
+    :"dcachemon1" is imm_21_27=0b0010010 & S5 & imm_0_13=0 {
+    _stub();
+    }
+    :"dcachemon2" is imm_21_27=0b0010011 & S5 & imm_0_13=0 {
+    _stub();
+    }
+    :"dcachemon3" is imm_21_27=0b0100000 & S5 & imm_13=0 & T5 & imm_0_7 {
+    _stub();
+    }
+    :"dcachemon4" is imm_21_27=0b0100001 & S5 & & T5 & imm_5_13 & D5 {
+    _stub();
+    }
+}
 
 #SYSTEM/MONITOR:Read int mask
 define pcodeop getimask;
