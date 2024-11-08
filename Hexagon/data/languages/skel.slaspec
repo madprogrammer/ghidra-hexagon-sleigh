@@ -97,6 +97,7 @@ imm_22_26 = (22, 26)
 
    imm_20_27 = (20, 27)
    imm_20_21 = (20, 21)
+   imm_20 = (20, 20) signed
 
    imm_18_21 = (18, 21)
    imm_18_20 = (18, 20)
@@ -112,6 +113,7 @@ imm_22_26 = (22, 26)
    imm_16_22 = (16, 22)
    imm_16_21 = (16, 21)
    imm_16_20 = (16, 20)
+   imm_16_19 = (16, 19)
    imm_16_17 = (16, 17)
 
    imm_13 = (13, 13) signed
@@ -144,6 +146,7 @@ imm_22_26 = (22, 26)
    imm_7_12 = (7, 12)
    imm_7 = (7, 7)
 
+   imm_6_7 = (6, 7)
    imm_6_13 = (6, 13)
    imm_6 = (6, 6)
 
@@ -1644,10 +1647,32 @@ with slot: iclass=0b1001 {
     	_stub();
     }
 }
+#LD:Load ac dword
+#LD:Load dword cond
+#LD:Load by
+#LD:Load by cond
+#LD:Load by shift
+#LD:Load by h shift
+#ld:load hw
+#ld:load hw cond
+#ld:load ub
+with slot: iclass=0b0011 {
+    :D5"=memub("S5"+"T5"#"u2")" is imm_21_27=0b1010001 & S5 & imm_13 & T5 & imm_7 & imm_5_6=0 & D5 [ u2 = (imm_7) | (imm_13 << 1);]  {
+        local tmp:4 = T5 << u2;
+        local tmp2:4 = S5 + T5;
+        D5 = *[ram]:1 tmp2;
+    }
+}
+#..
+
+
+#ld:load ub cond
+#ld:load uhw
+#ld:load uhw cond
 
 # LD
     # Special case for constant extender
-    wslot:"D5=memw__EXT(S5+#s11)" is iclass64=0b110 & imm64_27=0 & imm64_25_26 & imm64_21_24=0b1100 & S564 & imm64_5_13 & D564 {
+    wslot:"D5=memw__EXT(S5+#s11)" is iclass64=0b1001 & imm64_27=0 & imm64_25_26 & imm64_21_24=0b1100 & S564 & imm64_5_13 & D564 {
     _stub();
     }
 
@@ -1969,6 +1994,35 @@ with slot: iclass=0b1010 {
 
 # ST:Store by cond
 # ST:Store HW 
+with slot: iclass=0b0011 {
+    :"memh0" is imm_21_27=0b1011010 & S5 & imm_13 & T5 & imm_7 & imm_5_6=0 & D5 {
+        _stub();
+    }
+    :"memh1" is imm_21_27=0b1011011 & S5 & imm_13 & T5 & imm_7 & imm_5_6=0 & D5 {
+        _stub();
+    }
+    :"memh2" is imm_25_27=0b110 & imm_23_24=0 & imm_21_22=0b01 & S5 & imm_13 & T5 & imm_7_12 & imm_0_6=0 {
+    _stub();
+    }
+}
+with slot: iclass=0b0100 {
+    :"memh3" is imm_27=1 & imm_25_26 & imm_21_24=0b0010 & imm_16_20 & imm_13 & T5 & imm_0_7 {
+        _stub();
+    }
+    :"memh4" is imm_27=1 & imm_25_26 & imm_21_24=0b0011 & imm_16_20 & imm_13 & T5 & imm_0_7 {
+        _stub();
+    }
+}
+with slot: iclass=0b1010 {
+    :"memh5" is imm_27=0 & imm_25_26 & imm_21_24=0b1010 & imm_16_20 & imm_13 & T5 & imm_0_7 {
+        _stub();
+    }
+    :"memh6" is imm_27=0 & imm_25_26 & imm_21_24=0b1011 & imm_16_20 & imm_13 & T5 & imm_0_7 {
+        _stub();
+    }
+}
+
+
 # ST:Store HW cond
 # ST:Release
 with slot: iclass=0b1010 {
@@ -2521,8 +2575,37 @@ _stub();
 
 # XTYPE/MPY
 # XTYPE/MPY: Mul and use lower
-with slot: iclass=0b1110 {
+with slot: iclass=0b1101 {
 #..
+    :D5"=add(mpyi1("S5",)" is imm_23_27=0b11110 & imm_21_22 & S5 & imm_13 & T5 & imm_5_7 & D5 {
+    _stub();
+    }
+    :D5"=add(mpyi0("S5",)" is imm_23_27=0b11111 & imm_21_22 & S5 & imm_13 & T5 & imm_5_7 & D5 {
+    _stub();
+    }
+}
+with slot: iclass=0b1110 {
+    :D5"=add(mpyi("S5",)" is imm_21_27=0b0011000 & S5 & imm_13=0 & T5 & imm_5_7=0 & D5 {
+    _stub();
+    }
+    :D5"=+mpyi("S5",)" is imm_23_27=0b00000 & imm_21_22=0 & S5 & imm_13=0 & imm_5_12 & D5 {
+    _stub();
+    }
+    :D5"=-mpyi("S5",)" is imm_23_27=0b00001 & imm_21_22=0 & S5 & imm_13=0 & imm_5_12 & D5 {
+    _stub();
+    }
+
+    :D5"+=mpyi("S5",)" is imm_23_27=0b00010 & imm_21_22=0 & S5 & imm_13=0 & imm_5_12 & D5 {
+    _stub();
+    }
+    :D5"-=mpyi("S5",)" is imm_23_27=0b00011 & imm_21_22=0 & S5 & imm_13=0 & imm_5_12 & D5 {
+    _stub();
+    }
+    :D5"=mpyi("S5","T5")" is imm_21_27=0b1101000 & S5 & imm_13=0 & T5 & imm_5_7=0b000 & D5 {
+        local tmp:8 = sext(S5)*sext(T5);
+        local tmp2:8 = sext(D5) + tmp;
+        D5 = tmp2:4;
+    }
     :D5"+=mpyi("S5","T5")" is imm_21_27=0b1111000 & S5 & imm_13=0 & T5 & imm_5_7=0b000 & D5 {
         local tmp:8 = sext(S5)*sext(T5);
         local tmp2:8 = sext(D5) + tmp;
