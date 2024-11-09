@@ -162,6 +162,7 @@ imm_22_26 = (22, 26)
    imm_4 = (4, 4)
 
    imm_3_12 = (3, 12)
+   imm_3_7 = (3, 7)
    imm_3_6 = (3, 6)
    imm_3_4 = (3, 4)
    imm_3 = (3, 3)
@@ -176,6 +177,7 @@ imm_22_26 = (22, 26)
    imm_2 = (2, 2)
 
    imm_1_13 = (1, 13) signed
+   imm_1_11 = (1, 11) signed
    imm_1_7 = (1, 7)
    imm_1_2 = (1, 2)
    imm_1 = (1, 1)
@@ -1649,6 +1651,63 @@ with slot: iclass=0b1001 {
 }
 #LD:Load ac dword
 #LD:Load dword cond
+with slot: iclass=0b0011 {
+    :"ldcondd0" is imm_21_27=0b0000110 & S5 & imm_13 & imm_8_12 & imm_7 & imm_5_6 & D5 {
+    	_stub();
+    }
+    :"ldcondd1" is imm_21_27=0b0001110 & S5 & imm_13 & imm_8_12 & imm_7 & imm_5_6 & D5 {
+    	_stub();
+    }
+    :"ldcondd2" is imm_21_27=0b0010110 & S5 & imm_13 & imm_8_12 & imm_7 & imm_5_6 & D5 {
+    	_stub();
+    }
+    :"ldcondd3" is imm_21_27=0b0011110 & S5 & imm_13 & imm_8_12 & imm_7 & imm_5_6 & D5 {
+    	_stub();
+    }
+}
+with slot: iclass=0b0100 {
+    :"ldcondd4" is imm_21_27=0b0001110 & S5 & imm_13=0 & imm_11_12 & imm_5_10 & D5 {
+    	_stub();
+    }
+    :"ldcondd5" is imm_21_27=0b0011110 & S5 & imm_13=0 & imm_11_12 & imm_5_10 & D5 {
+    	_stub();
+    }
+    :"ldcondd6" is imm_21_27=0b0101110 & S5 & imm_13=0 & imm_11_12 & imm_5_10 & D5 {
+    	_stub();
+    }
+    :"ldcondd7" is imm_21_27=0b0111110 & S5 & imm_13=0 & imm_11_12 & imm_5_10 & D5 {
+    	_stub();
+    }
+}
+
+with slot: iclass=0b1001 {
+    :"ldcondd8" is imm_21_27=0b1011110 & S5 & imm_11_13=0b100 & imm_9_10 & imm_5_8 & D5 {
+    	_stub();
+    }
+    :"ldcondd9" is imm_21_27=0b1011110 & S5 & imm_11_13=0b101 & imm_9_10 & imm_5_8 & D5 {
+    	_stub();
+    }
+    :"ldcondd10" is imm_21_27=0b1011110 & S5 & imm_11_13=0b110 & imm_9_10 & imm_5_8 & D5 {
+    	_stub();
+    }
+    :"ldcondd11" is imm_21_27=0b1011110 & S5 & imm_11_13=0b111 & imm_9_10 & imm_5_8 & D5 {
+    	_stub();
+    }
+
+    :"ldcondd12" is imm_21_27=0b1111110 & imm_16_20 & imm_11_13=0b100 & imm_9_10 & imm_8 & imm_7=1 & imm_5_6=0 & D5 {
+    	_stub();
+    }
+    :"ldcondd13" is imm_21_27=0b1111110 & imm_16_20 & imm_11_13=0b101 & imm_9_10 & imm_8 & imm_7=1 & imm_5_6=0 & D5 {
+    	_stub();
+    }
+    :"ldcondd14" is imm_21_27=0b1111110 & imm_16_20 & imm_11_13=0b110 & imm_9_10 & imm_8 & imm_7=1 & imm_5_6=0 & D5 {
+    	_stub();
+    }
+    :"ldcondd15" is imm_21_27=0b1111110 & imm_16_20 & imm_11_13=0b111 & imm_9_10 & imm_8 & imm_7=1 & imm_5_6=0 & D5 {
+    	_stub();
+    }
+}
+
 #LD:Load by
 #LD:Load by cond
 #LD:Load by shift
@@ -1905,7 +1964,7 @@ with slot: iclass=0b0011 {
     }
 }
 with slot: iclass=0b0100 {
-    :"memd1" is imm_27=1 & imm_25_26 & imm_21_24=0b0110 & imm_16_20 & imm_13 & T5 & imm_0__7 {
+    :"memd1" is imm_27=1 & imm_25_26 & imm_21_24=0b0110 & imm_16_20 & imm_13 & T5 & imm_0_7 {
 	    _stub();
     }
 }
@@ -1949,6 +2008,36 @@ with slot: iclass=0b0101 {
 }
 
 # ST:Store dw cond
+with slot: iclass=0b0011 {
+    :"memdrl0" is imm_21_27=0b0100110 & S5 & imm_13 & imm_8_12 & imm_7 & imm_5_6 & D5  {
+    _stub();
+    }
+    :"memdrl1" is imm_21_27=0b0101110 & S5 & imm_13 & imm_8_12 & imm_7 & imm_5_6 & D5  {
+    _stub();
+    }
+    :"memdrl2" is imm_21_27=0b0110110 & S5 & imm_13 & imm_8_12 & imm_7 & imm_5_6 & D5  {
+    _stub();
+    }
+    :"memdrl3" is imm_21_27=0b0111110 & S5 & imm_13 & imm_8_12 & imm_7 & imm_5_6 & D5  {
+    _stub();
+    }
+}
+with slot: iclass=0b0100 {
+    :"memdrl4" is imm_21_27=0b0000110 & S5 & imm_13 & T5 & imm_3_7 & imm_2=0 & D2_pred  {
+    _stub();
+    }
+    :"memdrl5" is imm_21_27=0b0010110 & S5 & imm_13 & T5 & imm_3_7 & imm_2=0 & D2_pred  {
+    _stub();
+    }
+    :"memdrl6" is imm_21_27=0b0100110 & S5 & imm_13 & T5 & imm_3_7 & imm_2=0 & D2_pred  {
+    _stub();
+    }
+    :"memdrl7" is imm_21_27=0b0110110 & S5 & imm_13 & T5 & imm_3_7 & imm_2=0 & D2_pred  {
+    _stub();
+    }
+}
+
+
 # ST:Store by
 with slot: iclass=0b0011 {
     :"stb0" is imm_21_27=0b1011000 & S5 & imm_13 & imm_8_12 & imm_7 & imm_5_6=0 & imm_0_4  {
@@ -2214,18 +2303,18 @@ with slot: iclass=0b0110 {
     :"crswap("S5",sgp1)" is imm_21_27=0b0101001 & S5 & imm_0_13=0 {
     _stub();
     }
-    :"crswap("S5_pair",sgp1:0)" is imm_22_27=0b110110 & imm_21=0 & S5_pair & imm_5_13=0 & imm_0_4=0b00000 {
-    _stub();
-    }
+#    :"crswap("S5_pair",sgp1:0)" is imm_22_27=0b110110 & imm_21=0 & S5_pair & imm_5_13=0 & imm_0_4=0b00000 {
+#    _stub();
+#    }
 }
 
 #SYSTEM/MONITOR:Cancel pend
-define pcodeop cswi;
-with slot: iclass=0b0110 {
-    :"cswi("S5")" is imm_21_27=0b0100000 & S5 & imm_8_13=0 & imm_5_7=0b001 & imm_0_4=0 {
-        ciad(S5);
-    }
-}
+#define pcodeop cswi;
+#with slot: iclass=0b0110 {
+    #:"cswi("S5")" is imm_21_27=0b0100000 & S5 & imm_8_13=0 & imm_5_7=0b001 & imm_0_4=0 {
+        #ciad(S5);
+    #}
+#}
 
 #SYSTEM/MONITOR:Data cache kil
 define pcodeop dckill;
@@ -2247,7 +2336,7 @@ with slot: iclass=0b1010 {
     :"dcachemon3" is imm_21_27=0b0100000 & S5 & imm_13=0 & T5 & imm_0_7 {
     _stub();
     }
-    :"dcachemon4" is imm_21_27=0b0100001 & S5 & & T5 & imm_5_13 & D5 {
+    :"dcachemon4" is imm_21_27=0b0100001 & S5 & T5 & imm_5_13 & D5 {
     _stub();
     }
 }
@@ -2571,7 +2660,18 @@ _stub();
 
 # XTYPE/Complex
 
-# XTYPE/FP
+# XTYPE/FP: fp add
+# XTYPE/FP: fp class
+# XTYPE/FP: fp cmp
+# XTYPE/FP: fp conv to other
+with slot: iclass=0b1000 {
+    :D5"convsf2df1" is imm_23_27=0b01001 & imm_21_22=0 & S5 & imm_8_13=0 & imm_5_7=0b000 & D5 {
+_stub();
+    }
+    :D5"convsf2df2" is imm_21_27=0b1000000 & S5 & imm_8_13=0 & imm_5_7=0b001 & D5 {
+_stub();
+    }
+}
 
 # XTYPE/MPY
 # XTYPE/MPY: Mul and use lower
@@ -2640,6 +2740,36 @@ with slot: iclass=0b1110 {
     #..
 }
 
+# XTYPE/PRED:bound chk
+# XTYPE/PRED:cmp byte
+# XTYPE/PRED:cmp half
+# XTYPE/PRED:cmp dword
+# XTYPE/PRED:cmp mask
+with slot: iclass=0b1000 {
+    :"bitsclr" is imm_21_27=0b0101100 & S5 & imm_8_13 & imm_2_7=0 & D2_pred {
+    _stub();
+    }
+    :"bitsclr1" is imm_21_27=0b0101101 & S5 & imm_8_13 & imm_2_7=0 & D2_pred {
+    _stub();
+    }
+}
+with slot: iclass=0b1100 {
+    :"bitsclr2" is imm_21_27=0b0111010 & S5 & imm_13=0 & T5 & imm_2_7=0 & D2_pred {
+    _stub();
+    }
+    :"bitsclr3" is imm_21_27=0b0111011 & S5 & imm_13=0 & T5 & imm_2_7=0 & D2_pred {
+    _stub();
+    }
+    :"bitsclr4" is imm_21_27=0b0111100 & S5 & imm_13=0 & T5 & imm_2_7=0 & D2_pred {
+    _stub();
+    }
+    :"bitsclr5" is imm_21_27=0b0111101 & S5 & imm_13=0 & T5 & imm_2_7=0 & D2_pred {
+    _stub();
+    }
+}
+
+# XTYPE/PRED:Pred mask gen
+# XTYPE/PRED:Pred tlb match
 # XTYPE/PRED:Pred trans
 with slot: iclass=0b1000 {
     :D2_pred"="S5 is imm_21_27=0b0101010 & S5 & imm_2_13=0 & D2_pred {
@@ -2649,6 +2779,29 @@ with slot: iclass=0b1000 {
        D5=S2_pred;
     }
 }
+
+# XTYPE/PRED:test bit
+with slot: iclass=0b1000 {
+    :"tstbit" is imm_21_27=0b0101000 & S5 & imm_13=0 & imm_8_12 & imm_2_7=0 & D2_pred {
+        _stub();
+    }
+    :"tstbit1" is imm_21_27=0b0101001 & S5 & imm_13=0 & imm_8_12 & imm_2_7=0 & D2_pred {
+        _stub();
+    }
+    :"tstbit2" is imm_21_27=0b0111000 & S5 & imm_13=0 & imm_8_12 & imm_2_7=0 & D2_pred {
+        _stub();
+    }
+    :"tstbit3" is imm_21_27=0b0111001 & S5 & imm_13=0 & imm_8_12 & imm_2_7=0 & D2_pred {
+        _stub();
+    }
+}
+# XTYPE/PRED:vec cmp hw
+# XTYPE/PRED:vec cmp by for
+# XTYPE/PRED:vec cmp by
+# XTYPE/PRED:vec cmp w
+# XTYPE/PRED:vec cmp e v od
+# XTYPE/PRED:vec pck evn odd
+# XTYPE/PRED:vec mux
 
 # XTYPE/SHIFT:Shift by imm
 with slot: iclass=0b1000 {
