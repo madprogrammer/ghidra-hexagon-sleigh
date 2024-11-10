@@ -8,6 +8,11 @@
 # arbitary bit-count sext, not just bytes
 # allow sext and s>> in [] bit of constructor
 # allow (a+b, a) in tokens, keep getting imm64s wrong 
+# Allow setting size of local in constructor
+
+
+#TODO:
+# check ext values, they are wrong
 
 define endian=little;
 define alignment=4;
@@ -225,9 +230,12 @@ imm_22_26 = (22, 26)
 
    S7 = (16,22)
    S7_svctrl = (16,22)
+
    S5 = (16,20)
+   S5_pair = (17,20)
    S5_ctrl = (16,20)
    alu_X5 = (16,20)
+
    U2 = (8,9)
    
    parse = (14, 15)
@@ -274,7 +282,7 @@ X28SP
 FPLR
 ];
 
-attach variables [ D5_pair T5_pair ] [
+attach variables [ D5_pair T5_pair S5_pair ] [
 X0X1 
 X2X3 
 X4X5 
@@ -328,7 +336,7 @@ FP
 LR
  ];
 
-attach variables [ D5 D564 S5 alu_X5 T5 ] [
+attach variables [ D5 D564 S5 S564 alu_X5 T5 ] [
 X0 
 X1 
 X2 
@@ -480,7 +488,7 @@ P1
 P2
 P3
 ];
-attach variables [ U2 D2_pred T2_pred S2_pred U2_pred U2_5_6 ] [
+attach variables [ U2 D2_pred T2_pred S2_pred U2_pred U2_5_6 U1_23_24_pred] [
 P0
 P1
 P2
@@ -652,8 +660,12 @@ with slot: iclass=0b0111 {
     :D5="comb1(" is Rs=0 & MajOp=0b011 & imm_23=0 & imm_21_22=0b01 & S5 & imm_13=1 & imm_5_12 & D5 {
         _stub();
     }
-    :D5="comb2(" is Rs=1 & MajOp=0b100 & imm_23=0 & imm_16_22 & imm_13 & imm_5_12 & D5 {
-        _stub();
+    :D5_pair"=combine(#"imm_5_12",#"S8")" is Rs=1 & MajOp=0b100 & imm_23=0 & imm_16_22 & imm_13 & imm_5_12 & D5_pair [S8 = imm_13 | (imm_16_22<<1);] {
+        local tmp:4 = S8;
+        local tmp1:8 = zext(tmp);
+        local tmp2:4 = imm_5_12;
+        local tmp3:8 = zext(tmp2);
+        D5_pair = (tmp1<<32)|tmp3;
     }
     :D5="comb3(" is Rs=1 & MajOp=0b100 & imm_23=1 & imm_21_22=0 & imm_16_20 & imm_13 & imm_5_12 & D5 {
         _stub();
@@ -686,8 +698,13 @@ with slot: iclass=0b0111 {
     :D5="mux1(" is Rs=0 & MajOp=0b011 & imm_23=1 & imm_21_22 & S5 & imm_13=0 & imm_5_12 & D5 {
         _stub();
     }
-    :D5="mux2(" is Rs=1 & imm_25_26=0b01 & imm_23_24 & imm_16_22 & imm_13 & imm_5_12 & D5 {
-        _stub();
+    :D5"=mux("U1_23_24_pred",#"imm_5_12",#"S8")" is Rs=1 & imm_25_26=0b01 & U1_23_24_pred & imm_16_22 & imm_13 & imm_5_12 & D5 [ S8 = imm_13 | (imm_16_22 << 1);]{
+        if(U1_23_24_pred != 0) goto <good>;
+        D5 = S8;
+        goto inst_next;
+        <good>
+        D5 = imm_5_12;
+        goto inst_next;
     }
 }
 with slot: iclass=0b1111 {
@@ -1045,18 +1062,15 @@ with slot: iclass=0b0110 {
 }
 
 # CR: Looops
+#TODO: need analyser for these
 with slot: iclass=0b0110 {
     :"loop0" is imm_21_27=0b0000000 & S5 & imm_13=0 & imm_8_12 & imm_5_7=0 & imm_3_4 & imm_0_2=0 {
-        _stub();
     }
     :"loop1" is imm_21_27=0b0000001 & S5 & imm_13=0 & imm_8_12 & imm_5_7=0 & imm_3_4 & imm_0_2=0 {
-        _stub();
     }
     :"loop0_" is imm_21_27=0b1001000 & S5 & imm_13=0 & imm_8_12 & imm_5_7=0 & imm_3_4 & imm_0_2=0 {
-        _stub();
     }
     :"loop1_" is imm_21_27=0b1001001 & S5 & imm_13=0 & imm_3_12 & imm_2=0 & imm_0_1  {
-        _stub();
     }
 }
 
@@ -1067,7 +1081,7 @@ with slot: iclass=0b0110 {
     }
 }
 # const ext 
-wslot:D564"=add(pc,#"v")" is uimmw_hi & uimmw_lo & iclass64=0b0110  & imm64_27=1 & imm64_16_27=0b101001001001 & imm64_13=0 & uimm64_7_12 & imm64_5_6=0 & D564 [ v = (uimm64_7_12) | (uimmw_lo << 6) | (uimmw_hi << 19);]
+wslot:D564"=add(pc,#"v")" is uimmw_hi & uimmw_lo & iclass64=0b0110  & imm64_27=1 & imm64_16_27=0b101001001001 & imm64_13=0 & uimm64_7_12 & imm64_5_6=0 & D564 [ v = (uimm64_7_12) | (uimmw_lo << 7) | (uimmw_hi << 21);]
 {
         D564 = inst_start + v;
 }
@@ -1208,19 +1222,22 @@ with slot: iclass=0b0110 {
         _stub();
 	 }
 	 slot:"if("U2") jumpr:t "S5 is imm_21_27=0b0011010 & S5 & imm_13=0 & imm_11_12=0b10 & imm_10=0 & U2 & imm_0_7=0 {
-        _stub();
+        if(U2 == 0) goto inst_next;
+        goto [S5];
 	 }
 	 slot:"if("U2".new) jumpr:t "S5 is imm_21_27=0b0011010 & S5 & imm_13=0 & imm_11_12=0b11 & imm_10=0 & U2 & imm_0_7=0 {
         _stub();
 	 }
 	 slot:"if(!"U2") jumpr:nt "S5 is imm_21_27=0b0011011 & S5 & imm_13=0 & imm_11_12=0b00 & imm_10=0 & U2 & imm_0_7=0 {
-        _stub();
+        if(U2 != 0) goto inst_next;
+        goto [S5];
 	 }
 	 slot:"if(!"U2".new) jumpr:nt "S5 is imm_21_27=0b0011011 & S5 & imm_13=0 & imm_11_12=0b01 & imm_10=0 & U2 & imm_0_7=0 {
         _stub();
 	 }
 	 slot:"if(!"U2") jumpr:t "S5 is imm_21_27=0b0011011 & S5 & imm_13=0 & imm_11_12=0b10 & imm_10=0 & U2 & imm_0_7=0 {
-        _stub();
+        if(U2 != 0) goto inst_next;
+        goto [S5];
 	 }
 	 slot:"if(!"U2".new) jumpr:t "S5 is imm_21_27=0b0011011 & S5 & imm_13=0 & imm_11_12=0b11 & imm_10=0 & U2 & imm_0_7=0 {
         _stub();
@@ -1634,8 +1651,10 @@ with slot: iclass=0b1001 {
     	_stub();
     }
     
-    :D5"=dword6" is imm_21_27=0b1011110 & S5 & imm_12_13=0b00 & imm_9_11 & imm_5_8 & D5 {
-    	_stub();
+    :D5_pair"=memd("S5"++#"v")" is imm_21_27=0b1011110 & S5 & imm_12_13=0b00 & imm_9_11 & imm_5_8 & D5_pair [v = imm_5_8 << 3;] {
+        local EA:4 = S5;
+        S5 = S5+v;
+        D5_pair = *[ram]:4 EA;
     }
     
     :D5"=dword7" is imm_21_27=0b1011110 & S5 & imm_13 & imm_12=1 & imm_5_11 & D5 {
@@ -1731,8 +1750,9 @@ with slot: iclass=0b0011 {
 
 # LD
     # Special case for constant extender
-    wslot:"D5=memw__EXT(S5+#s11)" is iclass64=0b1001 & imm64_27=0 & imm64_25_26 & imm64_21_24=0b1100 & S564 & imm64_5_13 & D564 {
-    _stub();
+    wslot:"immext #"v" "D564"=memw("S564"+#"v1")" is immw_hi & immw_lo & iclass64=0b1001 & imm64_27=0 & imm64_25_26 & imm64_21_24=0b1100 & S564 & imm64_5_13 & D564 [v = (imm64_5_13 | (imm64_25_26 << 9) | (immw_lo << 7) | (immw_hi << 21)  )<<2; v1 = v;]{
+        local EA:4 = S564 + v;
+        D564 = *[ram]:4 EA;
     }
 
 #LD:Load word
@@ -2664,12 +2684,13 @@ _stub();
 # XTYPE/FP: fp class
 # XTYPE/FP: fp cmp
 # XTYPE/FP: fp conv to other
+define pcodeop convert_sf2df;
 with slot: iclass=0b1000 {
-    :D5"convsf2df1" is imm_23_27=0b01001 & imm_21_22=0 & S5 & imm_8_13=0 & imm_5_7=0b000 & D5 {
-_stub();
+    :D5_pair"=convert_sf2df("S5")" is imm_23_27=0b01001 & imm_21_22=0 & S5 & imm_8_13=0 & imm_5_7=0b000 & D5_pair {
+        D5_pair = convert_sf2df(S5);
     }
-    :D5"convsf2df2" is imm_21_27=0b1000000 & S5 & imm_8_13=0 & imm_5_7=0b001 & D5 {
-_stub();
+    :D5"=convert_sf2df("S5_pair")" is imm_21_27=0b1000000 & S5_pair & imm_8_13=0 & imm_5_7=0b001 & D5 {
+        D5 = convert_sf2df(S5_pair);
     }
 }
 
@@ -2688,8 +2709,10 @@ with slot: iclass=0b1110 {
     :D5"=add(mpyi("S5",)" is imm_21_27=0b0011000 & S5 & imm_13=0 & T5 & imm_5_7=0 & D5 {
     _stub();
     }
-    :D5"=+mpyi("S5",)" is imm_23_27=0b00000 & imm_21_22=0 & S5 & imm_13=0 & imm_5_12 & D5 {
-    _stub();
+    :D5"=+mpyi("S5","imm_5_12")" is imm_23_27=0b00000 & imm_21_22=0 & S5 & imm_13=0 & imm_5_12 & D5 {
+        local tmp:8 = imm_5_12;
+        local tmp1:8 = sext(S5) * tmp;
+        S5 = tmp1:4; 
     }
     :D5"=-mpyi("S5",)" is imm_23_27=0b00001 & imm_21_22=0 & S5 & imm_13=0 & imm_5_12 & D5 {
     _stub();
