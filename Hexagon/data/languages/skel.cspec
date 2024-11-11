@@ -28,6 +28,7 @@
   	</data_organization>
 	<stackpointer register="SP" space="ram"/>
 	<spacebase name="FP" register="FP" space="ram"/>
+	<spacebase name="SP" register="SP" space="ram"/>
 	<funcptr align="4" />
   
   	<global>
@@ -36,22 +37,22 @@
   	</global>
   	
   	<prefersplit style="inhalf">
-    	<register name="X0X1"/>
-    	<register name="X2X3"/>
-    	<register name="X4X5"/>
-    	<register name="X6X7"/>
-    	<register name="X8X9"/>
-    	<register name="X10X11"/>
-    	<register name="X12X13"/>
-    	<register name="X14X15"/>
-    	<register name="X16X17"/>
-    	<register name="X18X19"/>
-    	<register name="X20X21"/>
-    	<register name="X22X23"/>
-    	<register name="X24X25"/>
-    	<register name="X26X27"/>
-    	<register name="X28SP"/>
-    	<register name="FPLR"/>
+    	<register name="X1X0"/>
+    	<register name="X3X2"/>
+    	<register name="X5X4"/>
+    	<register name="X7X6"/>
+    	<register name="X9X8"/>
+    	<register name="X11X10"/>
+    	<register name="X13X12"/>
+    	<register name="X15X14"/>
+    	<register name="X17X16"/>
+    	<register name="X19X18"/>
+    	<register name="X21X20"/>
+    	<register name="X23X22"/>
+    	<register name="X25X24"/>
+    	<register name="X27X26"/>
+    	<register name="SPX28"/>
+    	<register name="LRFP"/>
     </prefersplit>
   	
   	<returnaddress>
@@ -60,7 +61,7 @@
   	
   	
   	<default_proto>
-    <prototype name="__stdcall" extrapop="0" stackshift="0" strategy="register">
+    <prototype name="__stdcall" extrapop="0" stackshift="0">
       <input>
         <pentry minsize="1" maxsize="4">
           <register name="X0" />
@@ -106,11 +107,15 @@
         <register name="X26" />
         
         
-        <register name="LR" />
+        
         <register name="SP" />
         <register name="FP" />
       </unaffected>
       <killedbycall>
+      <register name="X0" />
+      <register name="X1" />
+      <register name="X2" />
+      <register name="X3" />
           
         
         <register name="X6" />
@@ -123,6 +128,7 @@
         <register name="X13" />
         <register name="X14" />
         <register name="X15" />
+        
         
       </killedbycall>
     </prototype>
