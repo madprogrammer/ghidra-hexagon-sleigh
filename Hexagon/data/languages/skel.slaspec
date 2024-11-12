@@ -163,6 +163,7 @@ imm_22_26 = (22, 26)
    imm_5_8 = (5, 8)
    imm_5_7 = (5, 7)
    imm_5_6 = (5, 6)
+   imm_5 = (5, 5)
 
    imm_4 = (4, 4)
 
@@ -620,7 +621,7 @@ with slot: iclass=0b0111 {
 # ALU32/ALU:trans_imm
  with slot: iclass=0b0111 {
   	
-	ImmU16: v is    imm_22_23 & imm_0_13  [ v = (imm_22_23 << 13) | (imm_0_13); ] {
+	ImmU16: v is    imm_22_23 & imm_0_13  [ v = (imm_22_23 << 14) | (imm_0_13); ] {
 		local v1:4 = v;
 	 	export v1;
 	  }
@@ -1984,27 +1985,35 @@ with slot: iclass=0b0011 {
     _stub();
     }
 
-    slot:"memw()&=R" is imm_24_27=0b1110 & imm_23=0 & imm_21_22=0b01 & S5 & imm_13=0 & imm_7_12 & imm_5_6=0b10 & T5 {
+    :"memw()&=R" is imm_24_27=0b1110 & imm_23=0 & imm_21_22=0b01 & S5 & imm_13=0 & imm_7_12 & imm_5_6=0b10 & T5 {
     _stub();
     }
 
-    slot:"memw()|=R" is imm_24_27=0b1110 & imm_23=0 & imm_21_22=0b01 & S5 & imm_13=0 & imm_7_12 & imm_5_6=0b11 & T5 {
+    :"memw()|=R" is imm_24_27=0b1110 & imm_23=0 & imm_21_22=0b01 & S5 & imm_13=0 & imm_7_12 & imm_5_6=0b11 & T5 {
     _stub();
     }
 
-    slot:"memw()+=I" is imm_24_27=0b1111 & imm_23=0 & imm_21_22=0b01 & S5 & imm_13=0 & imm_7_12 & imm_5_6=0b00 & T5 {
+    :"memw()+=I" is imm_24_27=0b1111 & imm_23=0 & imm_21_22=0b01 & S5 & imm_13=0 & imm_7_12 & imm_5_6=0b00 & T5 {
     _stub();
     }
 
-    slot:"memw()-=I" is imm_24_27=0b1111 & imm_23=0 & imm_21_22=0b01 & S5 & imm_13=0 & imm_7_12 & imm_5_6=0b01 & T5 {
+    :"memw()-=I" is imm_24_27=0b1111 & imm_23=0 & imm_21_22=0b01 & S5 & imm_13=0 & imm_7_12 & imm_5_6=0b01 & T5 {
     _stub();
     }
 
-    slot:"memw()=clrbit" is imm_24_27=0b1111 & imm_23=0 & imm_21_22=0b01 & S5 & imm_13=0 & imm_7_12 & imm_5_6=0b10 & T5 {
+    :"memw()=clrbit" is imm_24_27=0b1111 & imm_23=0 & imm_21_22=0b01 & S5 & imm_13=0 & imm_7_12 & imm_5_6=0b10 & T5 {
     _stub();
     }
 
-    slot:"memw()=setbit" is imm_24_27=0b1111 & imm_23=0 & imm_21_22=0b01 & S5 & imm_13=0 & imm_7_12 & imm_5_6=0b11 & T5 {
+    :"memw()=setbit" is imm_24_27=0b1111 & imm_23=0 & imm_21_22=0b01 & S5 & imm_13=0 & imm_7_12 & imm_5_6=0b11 & T5 {
+    _stub();
+    }
+}
+
+# NV/J
+# NV/ST:ST new-value word
+with slot: iclass=0b0011 {
+    :"memw()=setbit" is imm_24_27=0b1111 & imm_23=0 & imm_21_22=0b01 & S5 & imm_13=0 & imm_7_12 & imm_5_6=0b11 & T5 {
     _stub();
     }
 }
@@ -2713,6 +2722,35 @@ _stub();
 _stub();
     }
 }
+# XTYPE/BIT:Interleave
+# XTYPE/BIT:Linear feedback
+# XTYPE/BIT:Masked parity
+# XTYPE/BIT:Bit rev
+# XTYPE/BIT:Set clear toggle big
+with slot: iclass=0b1000 {
+    :"setbit()" is imm_21_27=0b1100110 & S5 & imm_13=0 & imm_8_12 & imm_5_7=0b000 & D5 {
+	    _stub();
+    }
+    :"clrbit()" is imm_21_27=0b1100110 & S5 & imm_13=0 & imm_8_12 & imm_5_7=0b001 & D5 {
+	    _stub();
+    }
+    :"togglebit()" is imm_21_27=0b1100110 & S5 & imm_13=0 & imm_8_12 & imm_5_7=0b010 & D5 {
+	    _stub();
+    }
+}
+with slot: iclass=0b1100 {
+    :"setbit1()" is imm_21_27=0b01101 & imm_21=0 & S5 & imm_13=0 & T5 & imm_6_7=0b00 & imm_5=0 & D5 {
+	    _stub();
+    }
+    :"clrbit1()" is imm_21_27=0b01101 & imm_21=0 & S5 & imm_13=0 & T5 & imm_6_7=0b01 & imm_5=0 & D5 {
+	    _stub();
+    }
+    :"tglbit2()" is imm_21_27=0b01101 & imm_21=0 & S5 & imm_13=0 & T5 & imm_6_7=0b10 & imm_5=0 & D5 {
+	    _stub();
+    }
+}
+# XTYPE/BIT:split Bf
+# XTYPE/BIT:TI
 
 # XTYPE/Complex
 
