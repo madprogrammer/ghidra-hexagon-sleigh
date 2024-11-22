@@ -35,6 +35,7 @@ define token instr64 (64)
    
    imm64_27 = (59, 59)
 
+   imm64_25_27 = (57, 59) signed
    imm64_25_26 = (57, 58) signed
 
    imm64_22_23 = (54, 55) signed
@@ -52,6 +53,7 @@ define token instr64 (64)
    imm64_5_6 = (37, 38) signed
    imm64_7_12 = (39, 44) signed
    uimm64_7_12 = (39, 44)
+   imm64_0 = (32, 32) signed
 
    Rs64 = (59, 59)
    MajOp64 = (56,58)
@@ -1565,7 +1567,7 @@ with slot: iclass=0b0101 {
         export *[ram]:4 loc;
     }
 
-    slot:"J" JImm  is imm_25_27=0b100  &  imm_0=0 & JImm  {
+    :"J" JImm  is imm_25_27=0b100  &  imm_0=0 & JImm  {
         goto JImm;
      }
     
@@ -1590,6 +1592,11 @@ with slot: iclass=0b0101 {
          if(U2 == 0) goto IfImm;
 	 }
  }
+ 
+ # constant ext
+ 	wslot:"immext J"   is immw_hi & immw_lo & iclass64=0b0101 & imm64_25_27=0b100  &  imm64_0=0   {
+_stub();
+     }
 
 # J/Jump to address cond new
 with slot: iclass=0b0101 {
@@ -2368,6 +2375,7 @@ with slot: iclass=0b0110 {
     :"crswap("S5",sgp1)" is imm_21_27=0b0101001 & S5 & imm_0_13=0 {
     _stub();
     }
+
 #    :"crswap("S5_pair",sgp1:0)" is imm_22_27=0b110110 & imm_21=0 & S5_pair & imm_5_13=0 & imm_0_4=0b00000 {
 #    _stub();
 #    }
