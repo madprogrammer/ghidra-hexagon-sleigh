@@ -110,6 +110,9 @@
         
         <register name="SP" />
         <register name="FP" />
+
+        <!-- <register name="branch_tgt" /> -->
+        <!-- <register name="call_tgt" /> -->
       </unaffected>
       <killedbycall>
       <register name="X0" />
