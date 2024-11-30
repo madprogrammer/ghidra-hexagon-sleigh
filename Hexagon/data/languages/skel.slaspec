@@ -4349,7 +4349,7 @@ with slot: iclass=0b1110 {
     }
 }
 
-# XTYPE/ALU:sub hword TODO
+# XTYPE/ALU:sub hword
 with slot: iclass=0b1101 {
     :"subhw00" is imm_21_27=0b0101001 & S5 & imm_13=0 & T5 & imm_6_7=0b00 & imm_5=0 & D5 {
     _stub();
@@ -4730,7 +4730,12 @@ with slot: iclass=0b1110 {
     }
 }
 
-# XTYPE/PERM:CABAC TODO
+# XTYPE/PERM:CABAC
+with slot: iclass=0b1100 {
+    :"decbin" is imm_22_27=0b000111 & imm_21=0 & S5 & imm_13=0 & T5 & imm_6_7=0b11 & imm_5=0 & D5 {
+       _stub();
+    }
+}
 
 # XTYPE/PERM:sat
 with slot: iclass=0b1000 {
@@ -5266,6 +5271,15 @@ with slot: iclass=0b1100 {
 }
 
 # XTYPE/SHIFT:Shift by reg sat
+with slot: iclass=0b1100 {
+    :"shrregsat" is imm_22_27=0b011000 & imm_21=0 & S5 & imm_13=0 & imm_8_12 & imm_6_7=0b00 & imm_5=0 & D5 {
+    	_stub();
+    }
+    :"aslsat" is imm_22_27=0b011000 & imm_21=0 & S5 & imm_13=0 & imm_8_12 & imm_6_7=0b10 & imm_5=0 & D5 {
+    	_stub();
+    }
+}
+
 # XTYPE/SHIFT:Vec shift hw imm
 # XTYPE/SHIFT:Vec ath shift hw imm
 # XTYPE/SHIFT:Vec ath shift hw imm2
