@@ -5084,6 +5084,55 @@ with slot: iclass=0b1110 {
     }
 }
 # XTYPE/FP: xtype fp mk const
+with slot: iclass=0b1101 {
+    :"=sfmake00" is imm_22_27=0b011000 & imm_21 & imm_16_20 & imm_5_13 & D5 {
+        _stub();
+    }
+    :"=sfmake01" is imm_22_27=0b011001 & imm_21 & imm_16_20 & imm_5_13 & D5 {
+        _stub();
+    }
+    :"=sfmake02" is imm_22_27=0b100100 & imm_21 & imm_16_20 & imm_5_13 & D5 {
+        _stub();
+    }
+    :"=sfmake03" is imm_22_27=0b100101 & imm_21 & imm_16_20 & imm_5_13 & D5 {
+        _stub();
+    }
+}
+
+# XTYPE/FP: fp max 
+with slot: iclass=0b1110 {
+    :"=sfmax" is imm_21_27=0b1011100 & S5 & imm_13=0 & T5 & imm_5_7=0b000 & D5 {
+        _stub();
+    }
+}
+
+# XTYPE/FP: fp min
+with slot: iclass=0b1110 {
+    :"=sfmin" is imm_21_27=0b1011100 & S5 & imm_13=0 & T5 & imm_5_7=0b001 & D5 {
+        _stub();
+    }
+}
+
+# XTYPE/FP: fp mul
+with slot: iclass=0b1110 {
+    :"=sfmul" is imm_21_27=0b1011010 & S5 & imm_13=0 & T5 & imm_5_7=0b000 & D5 {
+        _stub();
+    }
+}
+
+# XTYPE/FP: fp recip aprox
+with slot: iclass=0b1110 {
+    :"=sfrecipapx" is imm_21_27=0b1011111 & S5 & imm_13=0 & T5 & imm_7=1 & imm_5_6 & D5 {
+        _stub();
+    }
+}
+
+# XTYPE/FP: fp sub
+with slot: iclass=0b1110 {
+    :"=sfsub" is imm_21_27=0b1011000 & S5 & imm_13=0 & T5 & imm_5_7=0b001 & D5 {
+        _stub();
+    }
+}
 
 # XTYPE/MPY
 # XTYPE/MPY: Mul and use lower
@@ -5291,10 +5340,58 @@ with slot: iclass=0b1110 {
        _stub();
     }
 }
-# XTYPE/MPY: Vec dual mul
-# XTYPE/MPY: Vec dual mul w round
-# XTYPE/MPY: Vec red mulp by
 
+# XTYPE/MPY: Vec dual mul
+with slot: iclass=0b1110 {
+    :"vecdualmu" is imm_24_27=0b1000 & imm_23 & imm_21_22=0b00 & S5 & imm_13=0 & T5 & imm_5_7=0b100 & D5 {
+       _stub();
+    }
+    :"vecdualmu1" is imm_24_27=0b1010 & imm_23 & imm_21_22=0b00 & S5 & imm_13=0 & T5 & imm_5_7=0b100 & D5 {
+       _stub();
+    }
+}
+
+# XTYPE/MPY: Vec dual mul w round and pck
+with slot: iclass=0b1110 {
+    :"vecdualmupck" is imm_24_27=0b1001 & imm_23 & imm_21_22=0 & S5 & imm_13=0 & T5 & imm_7=0 & imm_5_6=0b00 & D5 {
+       _stub();
+    }
+}
+
+# XTYPE/MPY: Vec red mulp by
+with slot: iclass=0b1110 {
+    :"vecredmulpby00" is imm_21_27=0b1000100 & S5 & imm_13=0 & T5 & imm_5_7=0b000 & D5 {
+       _stub();
+    }
+    :"vecredmulpby01" is imm_21_27=0b1000110 & S5 & imm_13=0 & T5 & imm_5_7=0b000 & D5 {
+       _stub();
+    }
+
+    :"vecredmulpby02" is imm_21_27=0b1010100 & S5 & imm_13=0 & T5 & imm_5_7=0b000 & D5 {
+       _stub();
+    }
+    :"vecredmulpby03" is imm_21_27=0b1010110 & S5 & imm_13=0 & T5 & imm_5_7=0b000 & D5 {
+       _stub();
+    }
+}
+
+# XTYPE/MPY: Vec mul s by us
+with slot: iclass=0b1110 {
+    :"vecmulsbyus" is imm_21_27=0b1000101 & S5 & imm_13=0 & T5 & imm_5_7=0b001 & D5 {
+       _stub();
+    }
+    :"vecmulsbyu1s" is imm_21_27=0b1010001 & S5 & imm_13=0 & T5 & imm_5_7=0b001 & D5 {
+       _stub();
+    }
+}
+
+# XTYPE/MPY: Vec mul even hw
+# XTYPE/MPY: Vec mul hw
+# XTYPE/MPY: Vec mul hw rnd and pck
+# XTYPE/MPY: Vec mul hw s by us
+# XTYPE/MPY: Vec red mul hw
+# XTYPE/MPY: Vec mul by
+# XTYPE/MPY: Vec poly mul hw
 
 # XTYPE/PERM
 # XTYPE/PERM:CABAC
