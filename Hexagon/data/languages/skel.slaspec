@@ -23,10 +23,12 @@
 # ST:     Decode up to v73, pcode unfinished
 # SYSTEM: Decode up to v73, pcode unfinished
 # XTYPE:  Decode up to <uncheck>, pcode unfinished << wip
-# XTYPE/ALU:  Decode up to v51, pcode unfinished
-# XTYPE/BIT:  Decode up to v51, pcode unfinished
+# XTYPE/ALU:      Decode up to v51, pcode unfinished
+# XTYPE/BIT:      Decode up to v51, pcode unfinished
 # XTYPE/COMPLEX:  Decode up to none, pcode unfinished
-# XTYPE/FP:  Decode up to none, pcode unfinished
+# XTYPE/FP:       Decode up to v51, pcode unfinished
+# XTYPE/PRED:     Decode up to v51, pcode unfinished
+# XTYPE/SHIFT:    Decode up to v51, pcode unfinished
 
 
 #TODO:
@@ -5386,12 +5388,85 @@ with slot: iclass=0b1110 {
 }
 
 # XTYPE/MPY: Vec mul even hw
+with slot: iclass=0b1110 {
+    :"vecmulevenhw" is imm_24_27=0b1000 & imm_23 & imm_21_22=0b00 & S5 & imm_13=0 & T5 & imm_5_7=0b110 & D5 {
+       _stub();
+    }
+
+    :"vecmuleven01" is imm_21_27=0b1010001 & S5 & imm_13=0 & T5 & imm_5_7=0b010 & D5 {
+       _stub();
+    }
+    :"vecmulevenhw02" is imm_24_27=0b1010 & imm_23 & imm_21_22=0b00 & S5 & imm_13=0 & T5 & imm_5_7=0b110 & D5 {
+       _stub();
+    }
+}
+
 # XTYPE/MPY: Vec mul hw
+with slot: iclass=0b1110 {
+    :"vecmulhw" is imm_24_27=0b0101 & imm_23 & imm_21_22=0b00 & S5 & imm_13=0 & T5 & imm_5_7=0b101 & D5 {
+       _stub();
+    }
+
+    :"vecmul01" is imm_21_27=0b0111001 & S5 & imm_13=0 & T5 & imm_5_7=0b001 & D5 {
+       _stub();
+    }
+    :"vecmulhw02" is imm_24_27=0b0111 & imm_23 & imm_21_22=0b00 & S5 & imm_13=0 & T5 & imm_5_7=0b101 & D5 {
+       _stub();
+    }
+}
+
 # XTYPE/MPY: Vec mul hw rnd and pck
+with slot: iclass=0b1110 {
+    :"vecmulhwrndpck" is imm_24_27=0b1101 & imm_23 & imm_21_22=0b01 & S5 & imm_13=0 & T5 & imm_5_7=0b111 & D5 {
+       _stub();
+    }
+}
+
 # XTYPE/MPY: Vec mul hw s by us
+with slot: iclass=0b1110 {
+    :"vecmulhwsbyus0" is imm_24_27=0b0101 & imm_23 & imm_21_22=0b00 & S5 & imm_13=0 & T5 & imm_5_7=0b111 & D5 {
+       _stub();
+    }
+    :"vecmulhwsbyus1" is imm_24_27=0b0111 & imm_23 & imm_21_22=0b11 & S5 & imm_13=0 & T5 & imm_5_7=0b101 & D5 {
+       _stub();
+    }
+}
+
 # XTYPE/MPY: Vec red mul hw
+with slot: iclass=0b1110 {
+    :"vecredmulhw" is imm_21_27=0b1000000 & S5 & imm_13=0 & T5 & imm_5_7=0b010 & D5 {
+       _stub();
+    }
+    :"vecredmulhw1" is imm_21_27=0b1010000 & S5 & imm_13=0 & T5 & imm_5_7=0b010 & D5 {
+       _stub();
+    }
+}
+
 # XTYPE/MPY: Vec mul by
+with slot: iclass=0b1110 {
+    :"vecredmulby0" is imm_21_27=0b0101010 & S5 & imm_13=0 & T5 & imm_5_7=0b001 & D5 {
+       _stub();
+    }
+    :"vecredmulby1" is imm_21_27=0b0101100 & S5 & imm_13=0 & T5 & imm_5_7=0b001 & D5 {
+       _stub();
+    }
+    :"vecredmulby2" is imm_21_27=0b0111100 & S5 & imm_13=0 & T5 & imm_5_7=0b001 & D5 {
+       _stub();
+    }
+    :"vecredmulby3" is imm_21_27=0b0111110 & S5 & imm_13=0 & T5 & imm_5_7=0b001 & D5 {
+       _stub();
+    }
+}
+
 # XTYPE/MPY: Vec poly mul hw
+with slot: iclass=0b1110 {
+    :"vecpolymulhw0" is imm_21_27=0b0101110 & S5 & imm_13=0 & T5 & imm_5_7=0b111 & D5 {
+       _stub();
+    }
+    :"vecpolymulhw1" is imm_21_27=0b0111101 & S5 & imm_13=0 & T5 & imm_5_7=0b111 & D5 {
+       _stub();
+    }
+}
 
 # XTYPE/PERM
 # XTYPE/PERM:CABAC
@@ -5426,7 +5501,9 @@ with slot: iclass=0b1000 {
        _stub();
     }
 }
+# XTYPE/PERM:vec align TODO
 
+# XTYPE/PRED
 # XTYPE/PRED:bound chk
 with slot: iclass=0b1101 {
     :"bc0" is imm_23_27=0b00100 & imm_21_22=0 & S5 & imm_13=1 & T5 & imm_5_7=0b100 & imm_2_4=0 & D2 {
@@ -5575,14 +5652,98 @@ with slot: iclass=0b1100 {
         _stub();
     }
 }
-# XTYPE/PRED:vec cmp hw
-# XTYPE/PRED:vec cmp by for
-# XTYPE/PRED:vec cmp by
-# XTYPE/PRED:vec cmp w
-# XTYPE/PRED:vec cmp e v od
-# XTYPE/PRED:vec pck evn odd
-# XTYPE/PRED:vec mux
 
+# XTYPE/PRED:vec cmp hw
+with slot: iclass=0b1101 {
+    :"veccmphw00" is imm_23_27=0b00100 & imm_21_22=0 & S5 & imm_13=0 & T5 & imm_5_7=0b011 & imm_2_4=0 & D2_pred {
+        _stub();
+    }
+    :"veccmphw01" is imm_23_27=0b00100 & imm_21_22=0 & S5 & imm_13=0 & T5 & imm_5_7=0b100 & imm_2_4=0 & D2_pred {
+        _stub();
+    }
+    :"veccmphw02" is imm_23_27=0b00100 & imm_21_22=0 & S5 & imm_13=0 & T5 & imm_5_7=0b101 & imm_2_4=0 & D2_pred {
+        _stub();
+    }
+
+    :"veccmphw03" is imm_21_27=0b1100000 & S5 & imm_13=0 & imm_5_12 & imm_3_4=0b01 & imm_2=0 & D2_pred {
+        _stub();
+    }
+    :"veccmphw04" is imm_21_27=0b1100001 & S5 & imm_13=0 & imm_5_12 & imm_3_4=0b01 & imm_2=0 & D2_pred {
+        _stub();
+    }
+    :"veccmphw05" is imm_21_27=0b1100010 & S5 & imm_13=0 & imm_12=0 & imm_5_11 & imm_3_4=0b01 & imm_2=0 & D2_pred {
+        _stub();
+    }
+}
+
+# XTYPE/PRED:vec cmp by for
+with slot: iclass=0b1101 {
+    :"veccmpbyfor" is imm_23_27=0b00100 & imm_21_22=0 & S5 & imm_13=1 & T5 & imm_5_7=0b000 & imm_2_4=0 & D2_pred {
+        _stub();
+    }
+}
+
+# XTYPE/PRED:vec cmp by
+with slot: iclass=0b1101 {
+    :"veccmpby00" is imm_23_27=0b00100 & imm_21_22=0 & S5 & imm_13=0 & T5 & imm_5_7=0b110 & imm_2_4=0 & D2_pred {
+        _stub();
+    }
+    :"veccmpby01" is imm_23_27=0b00100 & imm_21_22=0 & S5 & imm_13=0 & T5 & imm_5_7=0b111 & imm_2_4=0 & D2_pred {
+        _stub();
+    }
+    :"veccmpby02" is imm_23_27=0b00100 & imm_21_22=0 & S5 & imm_13=1 & T5 & imm_5_7=0b010 & imm_2_4=0 & D2_pred {
+        _stub();
+    }
+
+    :"veccmpby03" is imm_21_27=0b1100000 & S5 & imm_13=0 & imm_5_12 & imm_3_4=0b00 & imm_2=0 & D2_pred {
+        _stub();
+    }
+    :"veccmphw04" is imm_21_27=0b1100001 & S5 & imm_13=0 & imm_5_12 & imm_3_4=0b00 & imm_2=0 & D2_pred {
+        _stub();
+    }
+    :"veccmphw05" is imm_21_27=0b1100010 & S5 & imm_13=0 & imm_12=0 & imm_5_11 & imm_3_4=0b00 & imm_2=0 & D2_pred {
+        _stub();
+    }
+}
+
+# XTYPE/PRED:vec cmp w
+with slot: iclass=0b1101 {
+    :"veccmpw00" is imm_23_27=0b00100 & imm_21_22=0 & S5 & imm_13=0 & T5 & imm_5_7=0b000 & imm_2_4=0 & D2_pred {
+        _stub();
+    }
+    :"veccmpw01" is imm_23_27=0b00100 & imm_21_22=0 & S5 & imm_13=0 & T5 & imm_5_7=0b001 & imm_2_4=0 & D2_pred {
+        _stub();
+    }
+    :"veccmpw02" is imm_23_27=0b00100 & imm_21_22=0 & S5 & imm_13=0 & T5 & imm_5_7=0b010 & imm_2_4=0 & D2_pred {
+        _stub();
+    }
+
+    :"veccmpby03" is imm_21_27=0b1100000 & S5 & imm_13=0 & imm_5_12 & imm_3_4=0b10 & imm_2=0 & D2_pred {
+        _stub();
+    }
+    :"veccmphw04" is imm_21_27=0b1100001 & S5 & imm_13=0 & imm_5_12 & imm_3_4=0b10 & imm_2=0 & D2_pred {
+        _stub();
+    }
+    :"veccmphw05" is imm_21_27=0b1100010 & S5 & imm_13=0 & imm_12=0 & imm_5_11 & imm_3_4=0b10 & imm_2=0 & D2_pred {
+        _stub();
+    }
+}
+
+# XTYPE/PRED:vec pck evn odd
+with slot: iclass=0b1000 {
+    :"veccmpevod" is imm_24_27=0b1001 & imm_23=0 & imm_21_22=0b00 & imm_18_20 & imm_16_17 & imm_10_13=0 & imm_8_9 & imm_5_7 & D5 {
+        _stub();
+    }
+}
+
+# XTYPE/PRED:vec mux
+with slot: iclass=0b1101 {
+    :"vecmux" is imm_24_27=0b0001 & imm_21_23=0 & S5 & imm_13=0 & T5 & imm_7=0 & imm_5_6 & D5 {
+        _stub();
+    }
+}
+
+# XTYPE/SHIFT
 # XTYPE/SHIFT:Mask from imm
 # XTYPE/SHIFT:Shift by imm
 with slot: iclass=0b1000 {
