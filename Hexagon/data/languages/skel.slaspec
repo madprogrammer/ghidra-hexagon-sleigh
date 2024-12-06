@@ -48,7 +48,9 @@ define token instr64 (64)
    uimmw_lo = (0, 13)
 
    immw_hi = (16, 27) signed
+   immw_his = (16, 27) signed
    immw_lo = (0, 13) signed
+   immw_lou = (0, 13)
 
    parsew = (14, 15)
    parse64 = (46, 47)
@@ -57,9 +59,12 @@ define token instr64 (64)
    imm64_27 = (59, 59)
 
    imm64_25_27 = (57, 59) signed
+   imm64_25_27u = (57, 59)
    imm64_25_26 = (57, 58) signed
+   imm64_25_26u = (57, 58)
 
    imm64_22_23 = (54, 55) signed
+   imm64_22_23u = (54, 55)
    
 	imm64_21_27 = (53, 59)
    imm64_21_24 = (53, 56)
@@ -67,10 +72,13 @@ define token instr64 (64)
 
 	imm64_16_27 = (48, 59)
    imm64_16_20 = (48, 52) signed
+   imm64_16_20u = (48, 52)
    
    imm64_13 = (45, 45)
 
    imm64_5_13 = (37, 45) signed
+   imm64_5_13u = (37, 45)
+   imm64_5_10u = (37, 42)
    imm64_5_6 = (37, 38) signed
    imm64_7_12 = (39, 44) signed
    uimm64_7_12 = (39, 44)
@@ -116,6 +124,7 @@ define token instr (32)
 imm_22_26 = (22, 26)
    imm_22_27 = (22, 27)
    imm_22_23 = (22, 23) signed
+   imm_22_23u = (22, 23)
    imm_22 = (22, 22)
 
    imm_21_27 = (21, 27) signed
@@ -181,6 +190,7 @@ imm_22_26 = (22, 26)
    imm_7_13 = (7, 13)
    imm_7_12 = (7, 12)
    imm_7 = (7, 7)
+   imm_7u = (7, 7)
 
    imm_6_7 = (6, 7)
    imm_6_13 = (6, 13)
@@ -675,7 +685,7 @@ with slot: iclass=0b0111 {
 	}  
 }
 # Special case for constant extender
-wslot:"immext #"v" "D564"=#"v1 is immw_hi & immw_lo & iclass64=0b0111 & Rs64=1 & MajOp64=0b000 & imm64_21=0 &  D564 & imm64_22_23 & imm64_16_20 & imm64_5_13 [ v = (imm64_5_13) | (imm64_16_20 << 9) | (imm64_22_23 << 14) | (immw_lo << 6) | (immw_hi << 19); v1=v;]
+wslot:"immext #"v" "D564"=#"v1 is immw_his & immw_lou & iclass64=0b0111 & Rs64=1 & MajOp64=0b000 & imm64_21=0 &  D564 & imm64_22_23u & imm64_16_20u & imm64_5_13u & imm64_5_10u [ v = (imm64_5_10u) | (immw_lou << 6) | (immw_his << 20); v1=v;]
 {
     D564 = v:4;
 }
@@ -1774,8 +1784,9 @@ with slot: iclass=0b0001 {
 
 #LD:Load dword
 with slot: iclass=0b0011 {
-    :D5"=dword0" is imm_21_27=0b1010110  & S5 & imm_13 & imm_8_12 & imm_7 & imm_5_6=0 & D5 {
-    	_stub();
+    :D5_pair"=memd("S5"+"T5"<<"u2")" is imm_21_27=0b1010110  & S5 & imm_13u & T5 & imm_7u & imm_5_6=0 & D5_pair [u2 = imm_7u | (imm_13u<<1); ]{
+        local EA:4 = S5 + (T5 << u2);
+        D5_pair = *[ram]:4 EA;
     }
 }
 with slot: iclass=0b0100 {
@@ -2297,7 +2308,7 @@ with slot: iclass=0b1001 {
 
 # LD
     # Special case for constant extender
-    wslot:"immext #"v" "D564"=memw("S564"+#"v1")" is immw_hi & immw_lo & iclass64=0b1001 & imm64_27=0 & imm64_25_26 & imm64_21_24=0b1100 & S564 & imm64_5_13 & D564 [v = (imm64_5_13 | (imm64_25_26 << 9) | (immw_lo << 7) | (immw_hi << 21)  )<<2; v1 = v;]{
+    wslot:"immext #"v" "D564"=memw("S564"+#"v1")" is immw_his & immw_lou & iclass64=0b1001 & imm64_27=0 & imm64_25_26u & imm64_21_24=0b1100 & S564 & imm64_5_13u & D564 [v = (imm64_5_13u | (imm64_25_26u << 9) | (immw_lou << 7) | (immw_his << 21)  )<<2; v1 = v;]{
         local EA:4 = S564 + v;
         D564 = *[ram]:4 EA;
     }
