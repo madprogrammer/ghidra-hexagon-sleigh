@@ -80,6 +80,9 @@ define token instr64 (64)
    imm64_5_13u = (37, 45)
    imm64_5_10u = (37, 42)
    imm64_5_6 = (37, 38) signed
+   
+   imm64_1_6u = (33, 38)
+   
    imm64_7_12 = (39, 44) signed
    uimm64_7_12 = (39, 44)
    imm64_0 = (32, 32) signed
@@ -1756,8 +1759,8 @@ with slot: iclass=0b0101 {
  }
  
  # constant ext
- 	wslot:"immext J"   is immw_hi & immw_lo & iclass64=0b0101 & imm64_25_27=0b100  &  imm64_0=0   {
-_stub();
+ 	wslot:"immext() jump "v   is immw_his & immw_lou & iclass64=0b0101 & imm64_25_27=0b100  &  imm64_0=0 & imm64_1_6u [v = inst_start + ((imm64_1_6u) | (immw_lou << 6) | (immw_his<<20));] {
+		tgt_branch = v:4;
      }
 
 # J/Jump to address cond new
