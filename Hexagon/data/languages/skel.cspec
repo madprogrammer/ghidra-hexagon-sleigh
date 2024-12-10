@@ -113,6 +113,16 @@
 
         <!-- <register name="branch_tgt" /> -->
         <!-- <register name="call_tgt" /> -->
+        <register name="call_tgt" />
+        <register name="has_call_tgt" />
+        <register name="branch_tgt" />
+        <register name="has_branch_tgt" />
+        <register name="P0.new" />
+        <register name="P1.new" />
+        <register name="P2.new" />
+        <register name="P3.new" />
+        <register name="LR" />
+        <register name="X7" />
       </unaffected>
       <killedbycall>
       <register name="X0" />
@@ -122,7 +132,7 @@
           
         
         <register name="X6" />
-        <register name="X7" />
+        <!-- <register name="X7" /> -->
         <register name="X8" />
         <register name="X9" />
         <register name="X10" />
