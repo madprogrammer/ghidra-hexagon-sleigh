@@ -33,7 +33,7 @@
   
   	<global>
     	<range space="ram"/>
-    	<range space="register" first="0x0000" last="0xffff"/>
+    	
   	</global>
   	
   	<prefersplit style="inhalf">
@@ -121,7 +121,15 @@
         <register name="P1.new" />
         <register name="P2.new" />
         <register name="P3.new" />
-        <register name="LR" />
+        <register name="P0" />
+        <register name="P1" />
+        <register name="P2" />
+        <register name="P3" />
+        <register name="LC0" />
+                <register name="SA0" />
+        
+        
+        
         <register name="X7" />
       </unaffected>
       <killedbycall>
