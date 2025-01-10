@@ -117,6 +117,8 @@
         <register name="has_call_tgt" />
         <register name="branch_tgt" />
         <register name="has_branch_tgt" />
+        <register name="ret_tgt" />
+        <register name="has_ret_tgt" />
         <register name="P0.new" />
         <register name="P1.new" />
         <register name="P2.new" />
@@ -154,5 +156,52 @@
       </killedbycall>
     </prototype>
   </default_proto>
+  
+  <prototype name="regsave" extrapop="0" stackshift="0">
+      <input>
+        <pentry minsize="1" maxsize="4">
+          <register name="X0" />
+        </pentry>
+      </input>
+      <output>
+      	<pentry minsize="1" maxsize="4">
+          <register name="X0" />
+        </pentry>
+      </output>
+      <unaffected>
+      <register name="X0" />
+      <register name="X1" />
+      <register name="X2" />
+      <register name="X3" />
+      <register name="X4" />
+      <register name="X5" />
+      <register name="X6" />
+      
+        
+        <register name="SP" />
+        <register name="FP" />
+
+        
+        <register name="call_tgt" />
+        <register name="has_call_tgt" />
+        <register name="branch_tgt" />
+        <register name="has_branch_tgt" />
+                <register name="ret_tgt" />
+        <register name="has_ret_tgt" />
+        <register name="P0.new" />
+        <register name="P1.new" />
+        <register name="P2.new" />
+        <register name="P3.new" />
+        <register name="P0" />
+        <register name="P1" />
+        <register name="P2" />
+        <register name="P3" />
+        <register name="LC0" />
+                <register name="SA0" />
+        
+        
+        
+      </unaffected>
+    </prototype>
   	
 </compiler_spec>
