@@ -355,6 +355,7 @@ imm_22_26 = (22, 26)
    U2_pred_new = (8,9)
 
    T3_0_2 = (0,2)
+   T3_0_2_new = (0,2)
    T3_new_8_10 = (8,10)
 
    
@@ -638,7 +639,7 @@ X8
 X9
 ];
 # TODO: what is this list, this is wrong, x5 is right
-attach variables [ T3_new_8_10 ] [
+attach variables [ T3_new_8_10 T3_0_2_new ] [
 X0 
 X1 
 X2 
@@ -1750,43 +1751,93 @@ with slot: iclass=0b0101 {
       }
 
      :"p0=cmp.eq("S4",#-1); if (p0.new) jump:nt "CJ_R9 is CJ_R9 & imm_27=0 & imm_22_26=0b00110 & imm_20_21 & S4 & imm_13=0 & imm_10_12 & imm_8_9=0b00 & imm_1_7 & imm_0=0 {
-        
-     _stub();
+        if(S4 != -1) goto <bad>;
+            P0.new = 0xff;
+            jump(CJ_R9);
+            goto <end>;
+        <bad>
+            P0.new = 0x0;
+        <end>
      }
-     :"cj1 " CJ_R9 is CJ_R9 &  imm_27=0 & imm_22_26=0b00110 & imm_20_21 & S4 & imm_13=0 & imm_10_12 & imm_8_9=0b01 & imm_1_7 & imm_0=0 {
-        
-     _stub();
+     :"p0=cmp.gt("S4",#-1); if (p0.new) jump:nt "CJ_R9 is CJ_R9 & imm_27=0 & imm_22_26=0b00110 & imm_20_21 & S4 & imm_13=0 & imm_10_12 & imm_8_9=0b01 & imm_1_7 & imm_0=0 {
+        if(S4 <= -1) goto <bad>;
+            P0.new = 0xff;
+            jump(CJ_R9);
+            goto <end>;
+        <bad>
+            P0.new = 0x0;
+        <end>
      }
-     :"cj2 "CJ_R9 is CJ_R9 &   imm_27=0 & imm_22_26=0b00110 & imm_20_21 & S4 & imm_13=0 & imm_10_12 & imm_8_9=0b11 & imm_1_7 & imm_0=0{
-        
-     _stub();
+     :"p0=cmp.tstbit("S4",#0); if (p0.new) jump:nt "CJ_R9 is CJ_R9 & imm_27=0 & imm_22_26=0b00110 & imm_20_21 & S4 & imm_13=0 & imm_10_12 & imm_8_9=0b11 & imm_1_7 & imm_0=0 {
+        local tmp:4 = S4 & 1;
+        if(tmp == 0) goto <bad>;
+            P0.new = 0xff;
+            jump(CJ_R9);
+            goto <end>;
+        <bad>
+            P0.new = 0x0;
+        <end>
      }
 
-     :"cj3 "CJ_R9 is CJ_R9 &   imm_27=0 & imm_22_26=0b00110 & imm_20_21 & S4 & imm_13=1 & imm_10_12 & imm_8_9=0b00 & imm_1_7 & imm_0=0{
-        
-     _stub();
+     :"p0=cmp.eq("S4",#-1); if (p0.new) jump:t "CJ_R9 is CJ_R9 & imm_27=0 & imm_22_26=0b00110 & imm_20_21 & S4 & imm_13=1 & imm_10_12 & imm_8_9=0b00 & imm_1_7 & imm_0=0 {
+        if(S4 != -1) goto <bad>;
+            P0.new = 0xff;
+            jump(CJ_R9);
+            goto <end>;
+        <bad>
+            P0.new = 0x0;
+        <end>
      }
-     :"cj4 "CJ_R9 is CJ_R9 &   imm_27=0 & imm_22_26=0b00110 & imm_20_21 & S4 & imm_13=1 & imm_10_12 & imm_8_9=0b01 & imm_1_7 & imm_0=0{
-        
-     _stub();
-     }
-     :"cj5 "CJ_R9 is CJ_R9 &   imm_27=0 & imm_22_26=0b00110 & imm_20_21 & S4 & imm_13=1 & imm_10_12 & imm_8_9=0b11 & imm_1_7 & imm_0=0{
-        
-     _stub();
+     :"p0=cmp.gt("S4",#-1); if (p0.new) jump:t "CJ_R9 is CJ_R9 & imm_27=0 & imm_22_26=0b00110 & imm_20_21 & S4 & imm_13=1 & imm_10_12 & imm_8_9=0b01 & imm_1_7 & imm_0=0 {
+        if(S4 <= -1) goto <bad>;
+            P0.new = 0xff;
+            jump(CJ_R9);
+            goto <end>;
+        <bad>
+            P0.new = 0x0;
+        <end>
      }
 
-     :"cj6 "CJ_R9 is CJ_R9 &   imm_27=0 & imm_22_26=0b00111 & imm_20_21 & S4 & imm_13=0 & imm_10_12 & imm_8_9=0b00 & imm_1_7 & imm_0=0{
-        
-     _stub();
+     :"p0=cmp.tstbit("S4",#0); if (p0.new) jump:t "CJ_R9 is CJ_R9 & imm_27=0 & imm_22_26=0b00110 & imm_20_21 & S4 & imm_13=1 & imm_10_12 & imm_8_9=0b11 & imm_1_7 & imm_0=0 {
+        local tmp:4 = S4 & 1;
+        if(tmp == 0) goto <bad>;
+            P0.new = 0xff;
+            jump(CJ_R9);
+            goto <end>;
+        <bad>
+            P0.new = 0x0;
+        <end>
      }
-     :"cj7 "CJ_R9 is CJ_R9 &   imm_27=0 & imm_22_26=0b00111 & imm_20_21 & S4 & imm_13=0 & imm_10_12 & imm_8_9=0b01 & imm_1_7 & imm_0=0{
-        
-     _stub();
+
+     :"p0=cmp.eq("S4",#-1); if (!p0.new) jump:nt "CJ_R9 is CJ_R9 & imm_27=0 & imm_22_26=0b00111 & imm_20_21 & S4 & imm_13=0 & imm_10_12 & imm_8_9=0b00 & imm_1_7 & imm_0=0 {
+        if(S4 != -1) goto <bad>;
+            P0.new = 0xff;
+            goto <end>;
+        <bad>
+            P0.new = 0x0;
+            jump(CJ_R9);
+        <end>
      }
-     :"cj8 "CJ_R9 is CJ_R9 &   imm_27=0 & imm_22_26=0b00111 & imm_20_21 & S4 & imm_13=0 & imm_10_12 & imm_8_9=0b11 & imm_1_7 & imm_0=0{
-        
-     _stub();
+     :"p0=cmp.gt("S4",#-1); if (!p0.new) jump:nt "CJ_R9 is CJ_R9 & imm_27=0 & imm_22_26=0b00111 & imm_20_21 & S4 & imm_13=0 & imm_10_12 & imm_8_9=0b01 & imm_1_7 & imm_0=0 {
+        if(S4 <= -1) goto <bad>;
+            P0.new = 0xff;
+            goto <end>;
+        <bad>
+            P0.new = 0x0;
+            jump(CJ_R9);
+        <end>
      }
+     :"p0=cmp.tstbit("S4",#0); if (!p0.new) jump:nt "CJ_R9 is CJ_R9 & imm_27=0 & imm_22_26=0b00111 & imm_20_21 & S4 & imm_13=0 & imm_10_12 & imm_8_9=0b11 & imm_1_7 & imm_0=0 {
+        local tmp:4 = S4 & 1;
+        if(tmp != 0) goto <bad>;
+            P0.new = 0xff;
+            jump(CJ_R9);
+            goto <end>;
+        <bad>
+            P0.new = 0x0;
+        <end>
+     }
+
 #np
      :"cj9 "CJ_R9 is CJ_R9 &   imm_27=0 & imm_22_26=0b00111 & imm_20_21 & S4 & imm_13=1 & imm_10_12 & imm_8_9=0b00 & imm_1_7 & imm_0=0{
         
@@ -2252,7 +2303,7 @@ with slot: iclass=0b0001 {
 with slot: iclass=0b0011 {
     :D5_pair"=memd("S5"+"T5"<<"u2")" is imm_21_27=0b1010110  & S5 & imm_13u & T5 & imm_7u & imm_5_6=0 & D5_pair [u2 = imm_7u | (imm_13u<<1); ]{
         local EA:4 = S5 + (T5 << u2);
-        D5_pair = *[ram]:4 EA;
+        D5_pair = *[ram]:8 EA;
     }
 }
 with slot: iclass=0b0100 {
@@ -2263,7 +2314,7 @@ with slot: iclass=0b0100 {
 with slot: iclass=0b1001 {
 	:D5_pair"=memd("S5",#"s11")" is imm_27=0 & imm_25_26 & S5 & D5_pair & imm_5_13u [ s11 = ((imm_5_13u | (imm_25_26 << 9))<<3);] {
         local EA:4 = S5 + s11;
-        D5_pair = *[ram]:4 EA;
+        D5_pair = *[ram]:8 EA;
     }
     :D5"=dword3" is imm_21_27=0b1001110 & S5 & imm_13 & imm_12=0 & imm_10_11=0 & imm_9=0 & imm_5_8 & D5 {
     	_stub();
@@ -2279,7 +2330,7 @@ with slot: iclass=0b1001 {
     :D5_pair"=memd("S5"++#"v")" is imm_21_27=0b1011110 & S5 & imm_12_13=0b00 & imm_9_11 & imm_5_8 & D5_pair [v = imm_5_8 << 3;] {
         local EA:4 = S5;
         S5 = S5+v;
-        D5_pair = *[ram]:4 EA;
+        D5_pair = *[ram]:8 EA;
     }
     
     :D5"=dword7" is imm_21_27=0b1011110 & S5 & imm_13 & imm_12=1 & imm_5_11 & D5 {
@@ -2488,8 +2539,9 @@ with slot: iclass=0b0100 {
     }
 }
 with slot: iclass=0b1001 {
-    :"rd=memh3" is imm_27=0 & imm_25_26 & imm_21_24=0b1010 & S5 & imm_5_13 & D5  {
-        _stub();
+    :D5 "=memh(" S5 "+" s11 ")" is imm_27=0 & imm_25_26 & imm_21_24=0b1010 & S5 & imm_5_13u & D5 [ s11 = imm_5_13u | (imm_25_26 << 9);] {
+        local EA:4 = S5 + 11;
+        D5 = *[ram]:2 EA;
     }
     :"rd=memh4" is imm_21_27=0b1001010 & S5 & imm_13 & imm_12=0 & imm_10_11=0 & imm_9=0 & imm_5_8 & D5 {
         _stub();
@@ -2652,14 +2704,17 @@ with slot: iclass=0b0100 {
     :"if (" T2_11_12_pred_new ") " D5 "=memub(" S5 "+" imm_5_10u ")" is imm_21_27=0b0011001 & S5 & imm_13=0 & T2_11_12_pred_new & imm_5_10u & D5  {
     	if(T2_11_12_pred_new == 0) goto <end>;
 		local EA:4 = S5 + imm_5_10u;
-		D5 = *[ram]:4 EA;
+		D5 = *[ram]:1 EA;
 	<end>
     }
     :"rd=membuc7" is imm_21_27=0b0101001 & S5 & imm_13=0 & imm_11_12 & imm_5_10 & D5  {
         _stub();
     }
-    :"rd=membuc8" is imm_21_27=0b0111001 & S5 & imm_13=0 & imm_11_12 & imm_5_10 & D5  {
-        _stub();
+    :"if (!" T2_11_12_pred_new ") " D5 "=memub(" S5 "+" imm_5_10u ")" is imm_21_27=0b0111001 & S5 & imm_13=0 & T2_11_12_pred_new & imm_5_10u & D5  {
+    	if(T2_11_12_pred_new != 0) goto <end>;
+		local EA:4 = S5 + imm_5_10u;
+		D5 = *[ram]:1 EA;
+	<end>
     }
 }
 with slot: iclass=0b1001 {
@@ -2867,11 +2922,14 @@ with slot: iclass=0b1001 {
 	D5 = *[ram]:4 EA;
 	S5 = EA;
     }
-    :"rd=memw6" is imm_21_27=0b1011100 & S5 & imm_12_13=0b00 & imm_9_11=0 & imm_5_8 & D5  {
-        _stub();
+    :D5 "=memw(" S5 "++" s4 ")" is imm_21_27=0b1011100 & S5 & imm_12_13=0b00 & imm_9_11=0 & imm_5_8 & D5  [s4 = imm_5_8 << 2;] {
+        local EA:4 = S5;
+        S5 = S5+s4;
+        D5 = *[ram]:4 EA;
     }
-    :"rd=memw7" is imm_21_27=0b1101100 & S5 & imm_13 & imm_12=1 & imm_8_11 & imm_7 & imm_5_6 & D5  {
-        _stub();
+    :D5 "=memw(" S5 "<<" u2 "+" u6 ")" is imm_21_27=0b1101100 & S5 & imm_13u & imm_12=1 & imm_8_11 & imm_7u & imm_5_6 & D5 [u2 = imm_7u | (imm_13u << 1); u6 = imm_5_6  | (imm_8_11 << 2);] {
+        local EA:4 = (S5 << u2) + u6;
+        D5 = *[ram]:4 EA;
     }
     :"rd=memw8" is imm_21_27=0b1101100 & S5 & imm_13 & imm_12=0 & imm_8_11=0 & imm_7=0 & imm_5_6=0 & D5  {
         _stub();
@@ -2905,20 +2963,33 @@ with slot: iclass=0b0011 {
     }
 }
 with slot: iclass=0b0100 {
-    :"lwcond5()" is imm_21_27=0b0001100 & S5 & imm_13=0 & imm_11_12 & imm_5_10 & D5  {
-        _stub();
-    }
-    :"lwcond6()" is imm_21_27=0b0011100 & S5 & imm_13=0 & imm_11_12 & imm_5_10 & D5  {
-        _stub();
-    }
-    :"if(!" T2_11_12_pred ")" D5 "=memw(" S5 "+" u6 ")" is imm_21_27=0b0101100 & S5 & imm_13=0 & T2_11_12_pred & imm_5_10u & D5 [u6 = imm_5_10u<<2;] {
-    	if(T2_11_12_pred != 0) goto <end>;
+    :"if(" T2_11_12_pred ")" D5 "=memw(" S5 "+" u6 ")" is imm_21_27=0b0001100 & S5 & imm_13=0 & T2_11_12_pred & imm_5_10u & D5 [u6 = imm_5_10u<<2;] {
+        local cond:1 = T2_11_12_pred != 0;
+    	if(!cond) goto <end>;
 	local EA:4 = S5 + u6;
 	D5 = *[ram]:4 EA;
 	<end>
     }
-    :"lwcond8()" is imm_21_27=0b0111100 & S5 & imm_13=0 & imm_11_12 & imm_5_10 & D5  {
-        _stub();
+    :"if(" T2_11_12_pred_new ")" D5 "=memw(" S5 "+" u6 ")" is imm_21_27=0b0011100 & S5 & imm_13=0 & T2_11_12_pred_new & imm_5_10u & D5 [u6 = imm_5_10u<<2;] {
+        local cond:1 = T2_11_12_pred_new != 0;
+    	if(!cond) goto <end>;
+	local EA:4 = S5 + u6;
+	D5 = *[ram]:4 EA;
+	<end>
+    }
+    :"if(!" T2_11_12_pred ")" D5 "=memw(" S5 "+" u6 ")" is imm_21_27=0b0101100 & S5 & imm_13=0 & T2_11_12_pred & imm_5_10u & D5 [u6 = imm_5_10u<<2;] {
+        local cond:1 = T2_11_12_pred != 0;
+    	if(cond) goto <end>;
+	local EA:4 = S5 + u6;
+	D5 = *[ram]:4 EA;
+	<end>
+    }
+    :"if(!" T2_11_12_pred_new ")" D5 "=memw(" S5 "+" u6 ")" is imm_21_27=0b0111100 & S5 & imm_13=0 & T2_11_12_pred_new & imm_5_10u & D5 [u6 = imm_5_10u<<2;] {
+        local cond:1 = T2_11_12_pred_new != 0;
+    	if(cond) goto <end>;
+	local EA:4 = S5 + u6;
+	D5 = *[ram]:4 EA;
+	<end>
     }
 }
 with slot: iclass=0b1001 {
@@ -3185,11 +3256,15 @@ with slot: iclass=0b0010 {
 	<end>
     }
 
-    :"if(cmp(nsnew,rt) jmp 1" is imm_22_27=0b000100 & imm_20_21 & imm_19=0 & imm_16_18 & imm_13=0 & T5 & imm_1_7u & imm_0=0 {
-    _stub();
+    :"if(cmp.gtu("S3_new_16_18","T5") jmp:nt "r9 is imm_22_27=0b000100 & imm_20_21 & imm_19=0 & S3_new_16_18 & imm_13=0 & T5 & imm_1_7u & imm_0=0 [ r9 = inst_start + ((imm_1_7u | (imm_20_21 << 7)) << 2); ]{
+	if(S3_new_16_18 <= T5) goto <end>;
+	jump(r9);
+	<end>
     }
-    :"if(cmp(nsnew,rt) jmp 2" is imm_22_27=0b000100 & imm_20_21 & imm_19=0 & imm_16_18 & imm_13=1 & T5 & imm_1_7u & imm_0=0 {
-    _stub();
+    :"if(cmp.gtu("S3_new_16_18","T5") jmp:t "r9 is imm_22_27=0b000100 & imm_20_21 & imm_19=0 & S3_new_16_18 & imm_13=1 & T5 & imm_1_7u & imm_0=0 [ r9 = inst_start + ((imm_1_7u | (imm_20_21 << 7)) << 2); ]{
+	if(S3_new_16_18 <= T5) goto <end>;
+	jump(r9);
+	<end>
     }
 
     :"if(!cmp.gtu("S3_new_16_18","T5") jmp:t "r9 is imm_22_27=0b000101 & imm_20_21 & imm_19=0 & S3_new_16_18 & imm_13=0 & T5 & imm_1_7u & imm_0=0 [ r9 = inst_start + ((imm_1_7u | (imm_20_21 << 7)) << 2); ]{
@@ -3223,55 +3298,78 @@ with slot: iclass=0b0010 {
 	jump(r9);
 	<end>
     }
-    :"if(cmp(nsnew,rt) jmp" is imm_22_27=0b001001 & imm_20_21 & imm_19=0 & imm_16_18 & imm_13=0 & T5 & imm_1_7 & imm_0=0 {
+    :"if(cmp(nsnew,rt) jmp18" is imm_22_27=0b001001 & imm_20_21 & imm_19=0 & imm_16_18 & imm_13=0 & T5 & imm_1_7 & imm_0=0 {
     _stub();
     }
-    :"if(cmp(nsnew,rt) jmp" is imm_22_27=0b001001 & imm_20_21 & imm_19=0 & imm_16_18 & imm_13=1 & T5 & imm_1_7 & imm_0=0 {
+    :"if(cmp(nsnew,rt) jmp19" is imm_22_27=0b001001 & imm_20_21 & imm_19=0 & imm_16_18 & imm_13=1 & T5 & imm_1_7 & imm_0=0 {
     _stub();
     }
 
+#ns
     :"if(cmp.eq(" S3_new_16_18 "," imm_8_12u ") jump:nt" r9  is imm_22_27=0b010000 & imm_20_21 & imm_19=0 & S3_new_16_18 & imm_13=0 & imm_8_12u & imm_1_7u & imm_0=0 [ r9 = inst_start + ((imm_1_7u | (imm_20_21 << 7)) << 2); ]{
 	if(S3_new_16_18 != imm_8_12u) goto <end>;
 	jump(r9);
 	<end>
     }
-    :"if(cmp(nsnew,u5) jmp 2" is imm_22_27=0b010000 & imm_20_21 & imm_19=0 & imm_16_18 & imm_13=1 & imm_8_12 & imm_1_7 & imm_0=0 {
-    _stub();
+    :"if(cmp.eq(" S3_new_16_18 "," imm_8_12u ") jump:t" r9  is imm_22_27=0b010000 & imm_20_21 & imm_19=0 & S3_new_16_18 & imm_13=1 & imm_8_12u & imm_1_7u & imm_0=0 [ r9 = inst_start + ((imm_1_7u | (imm_20_21 << 7)) << 2); ]{
+	if(S3_new_16_18 != imm_8_12u) goto <end>;
+	jump(r9);
+	<end>
     }
-    :"if(cmp(nsnew,u5) jmp 3" is imm_22_27=0b010001 & imm_20_21 & imm_19=0 & imm_16_18 & imm_13=0 & imm_8_12 & imm_1_7 & imm_0=0 {
-    _stub();
+    :"if(!cmp.eq(" S3_new_16_18 "," imm_8_12u ") jump:t" r9  is imm_22_27=0b010001 & imm_20_21 & imm_19=0 & S3_new_16_18 & imm_13=0 & imm_8_12u & imm_1_7u & imm_0=0 [ r9 = inst_start + ((imm_1_7u | (imm_20_21 << 7)) << 2); ]{
+	if(S3_new_16_18 == imm_8_12u) goto <end>;
+	jump(r9);
+	<end>
     }
-    :"if(cmp(nsnew,u5) jmp 4" is imm_22_27=0b010001 & imm_20_21 & imm_19=0 & imm_16_18 & imm_13=1 & imm_8_12 & imm_1_7 & imm_0=0 {
-    _stub();
-    }
-
-    :"if(cmp(nsnew,u5) jmp 5" is imm_22_27=0b010010 & imm_20_21 & imm_19=0 & imm_16_18 & imm_13=0 & imm_8_12 & imm_1_7 & imm_0=0 {
-    _stub();
-    }
-    :"if(cmp(nsnew,u5) jmp 6" is imm_22_27=0b010010 & imm_20_21 & imm_19=0 & imm_16_18 & imm_13=1 & imm_8_12 & imm_1_7 & imm_0=0 {
-    _stub();
-    }
-    :"if(cmp(nsnew,u5) jmp 7" is imm_22_27=0b010011 & imm_20_21 & imm_19=0 & imm_16_18 & imm_13=0 & imm_8_12 & imm_1_7 & imm_0=0 {
-    _stub();
-    }
-    :"if(cmp(nsnew,u5) jmp 8" is imm_22_27=0b010011 & imm_20_21 & imm_19=0 & imm_16_18 & imm_13=1 & imm_8_12 & imm_1_7 & imm_0=0 {
-    _stub();
+    :"if(!cmp.eq(" S3_new_16_18 "," imm_8_12u ") jump:nt" r9  is imm_22_27=0b010001 & imm_20_21 & imm_19=0 & S3_new_16_18 & imm_13=1 & imm_8_12u & imm_1_7u & imm_0=0 [ r9 = inst_start + ((imm_1_7u | (imm_20_21 << 7)) << 2); ]{
+	if(S3_new_16_18 == imm_8_12u) goto <end>;
+	jump(r9);
+	<end>
     }
 
-    :"if(cmp(nsnew,u5) jmp 9" is imm_22_27=0b010100 & imm_20_21 & imm_19=0 & imm_16_18 & imm_13=0 & imm_8_12 & imm_1_7 & imm_0=0 {
-    _stub();
+    :"if(cmp.gt(" S3_new_16_18 "," imm_8_12u ") jump:nt" r9  is imm_22_27=0b010010 & imm_20_21 & imm_19=0 & S3_new_16_18 & imm_13=0 & imm_8_12u & imm_1_7u & imm_0=0 [ r9 = inst_start + ((imm_1_7u | (imm_20_21 << 7)) << 2); ]{
+	if(S3_new_16_18 <= imm_8_12u) goto <end>;
+	jump(r9);
+	<end>
     }
-    :"if(cmp(nsnew,u5) jmp 10" is imm_22_27=0b010100 & imm_20_21 & imm_19=0 & imm_16_18 & imm_13=1 & imm_8_12 & imm_1_7 & imm_0=0 {
-    _stub();
+    :"if(cmp.gt(" S3_new_16_18 "," imm_8_12u ") jump:t" r9  is imm_22_27=0b010010 & imm_20_21 & imm_19=0 & S3_new_16_18 & imm_13=1 & imm_8_12u & imm_1_7u & imm_0=0 [ r9 = inst_start + ((imm_1_7u | (imm_20_21 << 7)) << 2); ]{
+	if(S3_new_16_18 <= imm_8_12u) goto <end>;
+	jump(r9);
+	<end>
     }
-    :"if(cmp(nsnew,u5) jmp 11" is imm_22_27=0b010101 & imm_20_21 & imm_19=0 & imm_16_18 & imm_13=0 & imm_8_12 & imm_1_7 & imm_0=0 {
-    _stub();
+    :"if(!cmp.gt(" S3_new_16_18 "," imm_8_12u ") jump:nt" r9  is imm_22_27=0b010011 & imm_20_21 & imm_19=0 & S3_new_16_18 & imm_13=0 & imm_8_12u & imm_1_7u & imm_0=0 [ r9 = inst_start + ((imm_1_7u | (imm_20_21 << 7)) << 2); ]{
+	if(S3_new_16_18 > imm_8_12u) goto <end>;
+	jump(r9);
+	<end>
     }
-    :"if(cmp(nsnew,u5) jmp 12" is imm_22_27=0b010101 & imm_20_21 & imm_19=0 & imm_16_18 & imm_13=1 & imm_8_12 & imm_1_7 & imm_0=0 {
-    _stub();
+    :"if(!cmp.gt(" S3_new_16_18 "," imm_8_12u ") jump:t" r9  is imm_22_27=0b010011 & imm_20_21 & imm_19=0 & S3_new_16_18 & imm_13=1 & imm_8_12u & imm_1_7u & imm_0=0 [ r9 = inst_start + ((imm_1_7u | (imm_20_21 << 7)) << 2); ]{
+	if(S3_new_16_18 > imm_8_12u) goto <end>;
+	jump(r9);
+	<end>
     }
 
-    :"if(cmp(nsnew,u5) jmp 13" is imm_22_27=0b010110 & imm_20_21 & imm_19=0 & imm_16_18 & imm_13=0 & imm_8_12 & imm_1_7 & imm_0=0 {
+    :"if(cmp.gtu(" S3_new_16_18 "," imm_8_12u ") jump:nt" r9  is imm_22_27=0b010100 & imm_20_21 & imm_19=0 & S3_new_16_18 & imm_13=0 & imm_8_12u & imm_1_7u & imm_0=0 [ r9 = inst_start + ((imm_1_7u | (imm_20_21 << 7)) << 2); ]{
+	if(S3_new_16_18 <= imm_8_12u) goto <end>;
+	jump(r9);
+	<end>
+    }
+    :"if(cmp.gtu(" S3_new_16_18 "," imm_8_12u ") jump:t" r9  is imm_22_27=0b010100 & imm_20_21 & imm_19=0 & S3_new_16_18 & imm_13=1 & imm_8_12u & imm_1_7u & imm_0=0 [ r9 = inst_start + ((imm_1_7u | (imm_20_21 << 7)) << 2); ]{
+	if(S3_new_16_18 <= imm_8_12u) goto <end>;
+	jump(r9);
+	<end>
+    }
+    :"if(!cmp.gtu(" S3_new_16_18 "," imm_8_12u ") jump:nt" r9  is imm_22_27=0b010101 & imm_20_21 & imm_19=0 & S3_new_16_18 & imm_13=0 & imm_8_12u & imm_1_7u & imm_0=0 [ r9 = inst_start + ((imm_1_7u | (imm_20_21 << 7)) << 2); ]{
+	if(S3_new_16_18 > imm_8_12u) goto <end>;
+	jump(r9);
+	<end>
+    }
+    :"if(!cmp.gtu(" S3_new_16_18 "," imm_8_12u ") jump:t" r9  is imm_22_27=0b010101 & imm_20_21 & imm_19=0 & S3_new_16_18 & imm_13=1 & imm_8_12u & imm_1_7u & imm_0=0 [ r9 = inst_start + ((imm_1_7u | (imm_20_21 << 7)) << 2); ]{
+	if(S3_new_16_18 > imm_8_12u) goto <end>;
+	jump(r9);
+	<end>
+    }
+
+    :"if(tstbit(nsnew,u5) jmp 13" is imm_22_27=0b010110 & imm_20_21 & imm_19=0 & imm_16_18 & imm_13=0 & imm_8_12 & imm_1_7 & imm_0=0 {
     _stub();
     }
     :"if(cmp(nsnew,u5) jmp 14" is imm_22_27=0b010110 & imm_20_21 & imm_19=0 & imm_16_18 & imm_13=1 & imm_8_12 & imm_1_7 & imm_0=0 {
@@ -3419,8 +3517,9 @@ with slot: iclass=0b0100 {
     }
 }
 with slot: iclass=0b1010 {
-    :"memhnew3" is imm_27=0 & imm_25_26 & imm_21_24=0b1101 & imm_13 & imm_11_12=0b01 & imm_8_10 & imm_0_7 {
-    _stub();
+    :"memh(" S5 "+" s11 ")=" T3_new_8_10 is imm_27=0 & imm_25_26 & imm_21_24=0b1101 & S5 & imm_13u & imm_11_12=0b01 & T3_new_8_10 & imm_0_7u [ s11 = imm_0_7u | (imm_13u << 8) | (imm_25_26 << 9); ] {
+        local EA:4 = S5 + s11;
+        *[ram]:2 EA = T3_new_8_10;
     }
     :"memhnew4" is imm_21_27=0b1001101 & S5 & imm_13 & imm_11_12=0b01 & imm_8_10 & imm_7=0 & imm_2_6=0 & imm_1=1 & imm_0=0 {
     _stub();
@@ -3503,8 +3602,9 @@ with slot: iclass=0b1010 {
 
 # NV/ST:ST new-value word
 with slot: iclass=0b0011 {
-    :"memwnew1" is imm_21_27=0b1011101 & S5 & imm_13 & T5 & imm_7 & imm_5_6=0 & imm_3_4=0b10 & imm_0_2 {
-    _stub();
+    :"memw(" S5 "+" T5 "<<" u2 ")=" T3_0_2_new is imm_21_27=0b1011101 & S5 & imm_13u & T5 & imm_7u & imm_5_6=0 & imm_3_4=0b10 & T3_0_2_new[ u2 = imm_7u | (imm_13u << 1);] {
+        local EA:4 = S5 + (T5 << u2);
+        *[ram]:4 EA = T3_0_2_new;
     }
 }
 with slot: iclass=0b0100 {
@@ -3801,8 +3901,11 @@ with slot: iclass=0b0011 {
     }
 }
 with slot: iclass=0b0100 {
-    :"if("D2_pred" memb("S5"+#"u6")="T5 is imm_21_27=0b0000000 & S5 & imm_13 & T5 & imm_3_7 & imm_2=0 & D2_pred [u6 =(imm_3_7 | (imm_13 << 5)) << 3;] {
-    _stub();
+    :"if("D2_pred") memb("S5"+#"u6")="T5 is imm_21_27=0b0000000 & S5 & imm_13 & T5 & imm_3_7 & imm_2=0 & D2_pred [u6 =(imm_3_7 | (imm_13 << 5)) << 3;] {
+        if(D2_pred == 0) goto <bad>;
+            local EA:4 = S5 + u6;
+            *[ram]:1 EA = T5;
+        <bad>
     }
     :"stconb09" is imm_21_27=0b0010000 & S5 & imm_13 & T5 & imm_3_7 & imm_2=0 & D2_pred  {
     _stub();
@@ -3850,8 +3953,9 @@ with slot: iclass=0b0011 {
     :"memh1" is imm_21_27=0b1011011 & S5 & imm_13 & T5 & imm_7 & imm_5_6=0 & D5 {
         _stub();
     }
-    :"memh2" is imm_25_27=0b110 & imm_23_24=0 & imm_21_22=0b01 & S5 & imm_13 & imm_7_12 & imm_0_6 {
-    _stub();
+    :"memh(" S5 "+" u6 ")=" s8 is imm_25_27=0b110 & imm_23_24=0 & imm_21_22=0b01 & S5 & imm_13 & imm_7_12u & imm_0_6u [ u6 = imm_7_12u << 1; s8 = imm_0_6u | (imm_13 << 7);] {
+        local EA:4 = S5 + u6;
+        *[ram]:2 EA = s8;
     }
 }
 with slot: iclass=0b0100 {
@@ -4055,17 +4159,13 @@ with slot: iclass=0b1010 {
 
 # ST:Store word
 with slot: iclass=0b0011 {
-    :"memw("S5"+"T5"<<u2)=T5" is imm_21_27=0b1011100 & S5 & imm_13 & T5 & imm_7 & imm_5_6=0 & imm_0_4 { #  [s11 = (imm_0_7 | (imm_13 << 8) | (imm_16_20 << 9) | (imm_25_26 << 14)) << 2;] {
-        #local tmp:2 = s11 << 3;
-        #local tmp1:2 = tmp s>> 3;
-        #local EA:4 = GP + sext(tmp1);
-        #*[ram]:4 EA = T5;
-        _stub();
+    :"memw("S5"+"T5"<<"u2")=" D5 is imm_21_27=0b1011100 & S5 & imm_13u & T5 & imm_7u & imm_5_6=0 & D5 [ u2 = imm_7u | (imm_13u << 1);] { 
+        local EA:4 = S5 + (T5 << u2);
+        *[ram]:4 EA = D5;
     }
     :"memw("S5"+"U6")="S8 is imm_25_27=0b110 & imm_23_24=0 & imm_21_22=0b10 & S5 & imm_7_12u & imm_0_6u & imm_13 [ U6 = imm_7_12u << 2; S8=imm_0_6u | (imm_13 << 8);] {
         local EA:4 = S5 + U6;
         *[ram]:4 EA = S8;
-
     }
 }
 with wslot: iclass64=0b0011 {
@@ -4756,19 +4856,22 @@ with slot: iclass=0b1101 {
     }
 }
 with slot: iclass=0b1110 {
-    :"+=add2" is imm_23_27=0b00100 & imm_21_22=0b00 & S5 & imm_13=0 & imm_5_12 & imm_0_4 {
-        _stub();
+    :D5 "+=add(" S5 "," imm_5_12 ")" is imm_23_27=0b00100 & imm_21_22=0b00 & S5 & imm_13=0 & imm_5_12 & D5 {
+        local EA:4 = S5 + imm_5_12;
+        D5 = D5 + EA;
     }
     :D5"-=add("S5",#"imm_5_12")" is imm_23_27=0b00101 & imm_21_22=0b00 & S5 & imm_13=0 & imm_5_12 & D5 {
         local tmp:4 = S5+imm_5_12;
         D5 = D5 - tmp;
     }
 
-    :"+=add4" is imm_21_27=0b1111000 & S5 & imm_13=0 & imm_8_12 & imm_5_7=0b001 & imm_0_4 {
-        _stub();
+    :D5 "+=add(" S5 "," T5 ")" is imm_21_27=0b1111000 & S5 & imm_13=0 & T5 & imm_5_7=0b001 & D5 {
+        local EA:4 = S5 + T5;
+        D5 = D5 + EA;
     }
-    :"-=add5" is imm_21_27=0b1111100 & S5 & imm_13=0 & imm_8_12 & imm_5_7=0b001 & imm_0_4 {
-        _stub();
+    :D5 "+=add(" S5 "," T5 ")" is imm_21_27=0b1111100 & S5 & imm_13=0 & T5 & imm_5_7=0b001 & D5 {
+        local EA:4 = S5 + T5;
+        D5 = D5 - EA;
     }
 }
 # XTYPE/ALU:Add dword
@@ -7069,8 +7172,9 @@ with slot: iclass=0b1000 {
     :"rx|=lsr(rs,u5)" is imm_22_27=0b111001 & imm_21=0 & S5 & imm_13=0 & imm_8_12 & imm_5_7=0b101 & D5 {
     	_stub();
     }
-    :"rx|=asl(rs,u5)" is imm_22_27=0b111001 & imm_21=0 & S5 & imm_13=0 & imm_8_12 & imm_5_7=0b110 & D5 {
-    	_stub();
+    :D5 "|=asl(" S5 "," imm_8_12u ")" is imm_22_27=0b111001 & imm_21=0 & S5 & imm_13=0 & imm_8_12u & imm_5_7=0b110 & D5 {
+        local EA:4 = S5 << imm_8_12u;
+        D5 = D5 | EA;
     }
     :"rx|=rol(rs,u5)" is imm_22_27=0b111001 & imm_21=0 & S5 & imm_13=0 & imm_8_12 & imm_5_7=0b111 & D5 {
     	_stub();
@@ -7552,11 +7656,13 @@ _stub();
 
 
 # Duplex/S2
-S2L:"storeh_io" is immdup0_11_12=0b00 & immdup0_8_10 & immdup0_4_7 & immdup0_0_3 {
-_stub();
+S2L:immdup0_D4 "=memh(" immdup0_S4 "+" v ")" is immdup0_11_12=0b00 & immdup0_8_10 & immdup0_S4 & immdup0_D4 [ v = immdup0_8_10 << 1; ] {
+    local EA:4 = immdup0_S4 + v;
+    immdup0_D4 = *[ram]:2 EA;
 }
-S2R:"storeh_io" is immdup1_11_12=0b00 & immdup1_8_10 & immdup1_4_7 & immdup1_0_3 {
-_stub();
+S2R:immdup1_D4 "=memh(" immdup1_S4 "+" v ")" is immdup1_11_12=0b00 & immdup1_8_10 & immdup1_S4 & immdup1_D4 [ v = immdup1_8_10 << 1; ] {
+    local EA:4 = immdup1_S4 + v;
+    immdup1_D4 = *[ram]:2 EA;
 }
 
 S2L:"memw(SP+" a ") =" immdup0_D4 is immdup0_9_12=0b0100 & immdup0_4_8 & immdup0_D4 [a = immdup0_4_8 << 2;]{
@@ -7577,25 +7683,31 @@ S2R:"memd(SP+" a ") =" immdup1_D3_pair is immdup1_9_12=0b0101 & immdup1_3_8 & im
 	*[ram]:8 EA = immdup1_D3_pair;
 }
 
-S2L:"storewi0" is immdup0_8_12=0b10000 & immdup0_4_7 & immdup0_0_3 {
-_stub();
+S2L:"memw(" immdup0_S4 "+"v ") = 0" is immdup0_8_12=0b10000 & immdup0_S4 & immdup0_0_3 [v = immdup0_0_3 << 2;] {
+	local EA:4 = immdup0_S4 + v;
+	*[ram]:4 EA = 0;
 }
-S2R:"storewi0" is immdup1_8_12=0b10000 & immdup1_4_7 & immdup1_0_3 {
-_stub();
-}
-
-S2L:"storewi1" is immdup0_8_12=0b10001 & immdup0_4_7 & immdup0_0_3 {
-_stub();
-}
-S2R:"storewi1" is immdup1_8_12=0b10001 & immdup1_4_7 & immdup1_0_3 {
-_stub();
+S2R:"memw(" immdup1_S4 "+"v ") = 0" is immdup1_8_12=0b10000 & immdup1_S4 & immdup1_0_3 [v = immdup1_0_3 << 2;] {
+	local EA:4 = immdup1_S4 + v;
+	*[ram]:4 EA = 0;
 }
 
-S2L:"storebi0" is immdup0_8_12=0b10010 & immdup0_4_7 & immdup0_0_3 {
-_stub();
+S2L:"memw(" immdup0_S4 "+"v ") = 1" is immdup0_8_12=0b10001 & immdup0_S4 & immdup0_0_3 [v = immdup0_0_3 << 2;] {
+	local EA:4 = immdup0_S4 + v;
+	*[ram]:4 EA = 1;
 }
-S2R:"storebi0" is immdup1_8_12=0b10010 & immdup1_4_7 & immdup1_0_3 {
-_stub();
+S2R:"memw(" immdup1_S4 "+"v ") = 1" is immdup1_8_12=0b10001 & immdup1_S4 & immdup1_0_3 [v = immdup1_0_3 << 2;] {
+	local EA:4 = immdup1_S4 + v;
+	*[ram]:4 EA = 1;
+}
+
+S2L:"memb(" immdup0_S4 "+" immdup0_0_3 ") = 0" is immdup0_8_12=0b10010 & immdup0_S4 & immdup0_0_3 {
+	local EA:4 = immdup0_S4 +  immdup0_0_3;
+	*[ram]:1 EA = 0;
+}
+S2R:"memb(" immdup1_S4 "+" immdup1_0_3 ") = 0" is immdup1_8_12=0b10010 & immdup1_S4 & immdup1_0_3  {
+	local EA:4 = immdup1_S4 +  immdup1_0_3;
+	*[ram]:1 EA = 0;
 }
 
 S2L:"memb(" immdup0_S4 "+" immdup0_0_3 ") = 1" is immdup0_8_12=0b10011 & immdup0_S4 & immdup0_0_3 {
@@ -7913,45 +8025,52 @@ macro prolude() {
 }
 
 
-slot0: slot is slot &  (parse=0b01 | parse=0b10) & iclass { build slot; }
-slot1: slot0 is slot0 {  build slot0; }
-slot2: slot0 is slot0 { build slot0; }
-slotX: slot is slot & parse=0b11 { build slot; prolude(); }
-slotX: duplex is duplex & parse=0b00 { build duplex; prolude();}
+#slot0: slot is slot &  (parse=0b01 | parse=0b10) & iclass { build slot; }
+#slot1: slot0 is slot0 {  build slot0; }
+#slot2: slot0 is slot0 { build slot0; }
+#slotX: slot is slot & parse=0b11 { build slot; prolude(); }
+#slotX: duplex is duplex & parse=0b00 { build duplex; prolude();}
 
-:{ slot0 slotX "}:endloop0" is slot0 & parse=0b10; slotX {
-    prelude();
-	build slot0;
-	build slotX;
-    if(LC0 <= 1) goto <end>;
-    LC0 = LC0 - 1;
-    goto [SA0];
-    <end> 
+:{ duplex is duplex & parse=0b00 {
+    build duplex;
 }
-:{ slot0 slotX } is slot0 & parse=0b01;slotX {
-    prelude();
-	build slot0;
-	build slotX;
+:{ slot is slot & parse!=0b00{
+    build slot;
 }
 
-:{ slot0 slot1 slotX } is slot0;slot1;slotX {
-    prelude();
-	build slot0;
-	build slot1;
-	build slotX;
-}
-:{ slot0 slot1 slot2 slotX } is slot0;slot1;slot2;slotX {
-    prelude();
-	build slot0;
-	build slot1;
-	build slot2;
-	build slotX;
-}
+#   :{ slot0 slotX "}:endloop0" is slot0 & parse=0b10; slotX {
+#       prelude();
+#       build slot0;
+#       build slotX;
+#       if(LC0 <= 1) goto <end>;
+#       LC0 = LC0 - 1;
+#       goto [SA0];
+#       <end> 
+#   }
+#   :{ slot0 slotX } is slot0 & parse=0b01;slotX {
+#       prelude();
+#       build slot0;
+#       build slotX;
+#   }
 
-:{ slotX } is slotX {
-    prelude();
-	build slotX;
-} 
+#   :{ slot0 slot1 slotX } is slot0;slot1;slotX {
+#       prelude();
+#       build slot0;
+#       build slot1;
+#       build slotX;
+#   }
+#   :{ slot0 slot1 slot2 slotX } is slot0;slot1;slot2;slotX {
+#       prelude();
+#       build slot0;
+#       build slot1;
+#       build slot2;
+#       build slotX;
+#   }
+
+#   :{ slotX } is slotX {
+#       prelude();
+#       build slotX;
+#   } 
 
 slot:"immext0(" v ")" is iclass=0b0000 & imm_16_27 & imm_0_13u & hasext=0  [v= ((imm_0_13u) | (imm_16_27 << 14)) << 6; immex = ((imm_0_13u) | (imm_16_27 << 14)) << 6; hasext=1;] { } 
 slot:"immext1(" v ")" is iclass=0b0000 & imm_16_27 & imm_0_13u & hasext=1  [v=((imm_0_13u) | (imm_16_27 << 14)) << 6; immex1 = ((imm_0_13u) | (imm_16_27 << 14)) << 6; hasext1=1;] { } 
@@ -7966,45 +8085,45 @@ wslotX: wslot is wslot & iclassw=0b0000 & (parsew=0b01 | parsew=0b10) & (parse64
 ##build wslot; prolude();
 #}
 
-:{ wslotX } is wslotX {
-    prelude();
-	build wslotX;
-} 
-
-:{ wslot0 wslotX } is wslot0; wslotX {
-    prelude();
-	build wslot0;
-	build wslotX;
-} 
-
-:{ wslot0 slot0 slotX } is wslot0; slot0; slotX {
-    prelude();
-	build wslot0;
-	build slot0;
-	build slotX;
-} 
-
-:{ wslot0 slotX } is wslot0; slotX {
-    prelude();
-	build wslot0;
-	build slotX;
-} 
-:{ slot0 wslotX } is slot0; wslotX {
-    prelude();
-	build slot0;
-	build wslotX;
-}
-:{ slot0 slot1 wslotX } is slot0; slot1; wslotX {
-    prelude();
-	build slot0;
-	build slot1;
-	build wslotX;
-}
-:{ slot0 wslot0 slotX } is slot0; wslot0; slotX {
-    prelude();
-	build slot0;
-	build wslot0;
-	build slotX;
-}
+#:{ wslotX } is wslotX {
+    #prelude();
+	#build wslotX;
+#} 
+#
+#:{ wslot0 wslotX } is wslot0; wslotX {
+    #prelude();
+	#build wslot0;
+	#build wslotX;
+#} 
+#
+#:{ wslot0 slot0 slotX } is wslot0; slot0; slotX {
+    #prelude();
+	#build wslot0;
+	#build slot0;
+	#build slotX;
+#} 
+#
+#:{ wslot0 slotX } is wslot0; slotX {
+    #prelude();
+	#build wslot0;
+	#build slotX;
+#} 
+#:{ slot0 wslotX } is slot0; wslotX {
+    #prelude();
+	#build slot0;
+	#build wslotX;
+#}
+#:{ slot0 slot1 wslotX } is slot0; slot1; wslotX {
+    #prelude();
+	#build slot0;
+	#build slot1;
+	#build wslotX;
+#}
+#:{ slot0 wslot0 slotX } is slot0; wslot0; slotX {
+    #prelude();
+	#build slot0;
+	#build wslot0;
+	#build slotX;
+#}
 
 
