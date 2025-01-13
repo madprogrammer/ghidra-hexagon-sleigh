@@ -1839,19 +1839,34 @@ with slot: iclass=0b0101 {
      }
 
 #np
-     :"cj9 "CJ_R9 is CJ_R9 &   imm_27=0 & imm_22_26=0b00111 & imm_20_21 & S4 & imm_13=1 & imm_10_12 & imm_8_9=0b00 & imm_1_7 & imm_0=0{
-        
-     _stub();
+     :"p0=cmp.eq("S4",#-1); if (!p0.new) jump:t "CJ_R9 is CJ_R9 & imm_27=0 & imm_22_26=0b00111 & imm_20_21 & S4 & imm_13=1 & imm_10_12 & imm_8_9=0b00 & imm_1_7 & imm_0=0 {
+        if(S4 != -1) goto <bad>;
+            P0.new = 0xff;
+            goto <end>;
+        <bad>
+            P0.new = 0x0;
+            jump(CJ_R9);
+        <end>
      }
-     :"cj10 "CJ_R9 is CJ_R9 &   imm_27=0 & imm_22_26=0b00111 & imm_20_21 & S4 & imm_13=1 & imm_10_12 & imm_8_9=0b01 & imm_1_7 & imm_0=0{
-        
-     _stub();
+     :"p0=cmp.gt("S4",#-1); if (!p0.new) jump:t "CJ_R9 is CJ_R9 & imm_27=0 & imm_22_26=0b00111 & imm_20_21 & S4 & imm_13=1 & imm_10_12 & imm_8_9=0b01 & imm_1_7 & imm_0=0 {
+        if(S4 <= -1) goto <bad>;
+            P0.new = 0xff;
+            goto <end>;
+        <bad>
+            P0.new = 0x0;
+            jump(CJ_R9);
+        <end>
      }
-     :"cj11 "CJ_R9 is CJ_R9 &   imm_27=0 & imm_22_26=0b00111 & imm_20_21 & S4 & imm_13=1 & imm_10_12 & imm_8_9=0b11 & imm_1_7 & imm_0=0{
-        
-     _stub();
+     :"p0=cmp.tstbit("S4",#0); if (!p0.new) jump:t "CJ_R9 is CJ_R9 & imm_27=0 & imm_22_26=0b00111 & imm_20_21 & S4 & imm_13=1 & imm_10_12 & imm_8_9=0b11 & imm_1_7 & imm_0=0 {
+        local tmp:4 = S4 & 1;
+        if(tmp != 0) goto <bad>;
+            P0.new = 0xff;
+            jump(CJ_R9);
+            goto <end>;
+        <bad>
+            P0.new = 0x0;
+        <end>
      }
-     
       
       :"P0.new=cmp.eq("S4", "imm_8_12u"); if (P0.new) jump:nt "CJ_R9 is imm_27=0 & imm_22_26=0b00000 & S4 & imm_13=0 & imm_8_12u & imm_0=0 & CJ_R9 {
         if(S4 != imm_8_12u) goto <bad>;
@@ -1862,9 +1877,14 @@ with slot: iclass=0b0101 {
         P0.new = 0x0;
 	<end>
      }
-     :"cj13 "CJ_R9 is CJ_R9 &     imm_27=0 & imm_22_26=0b00000 & imm_20_21 & S4 & imm_13=1 & imm_8_12 & imm_1_7 & imm_0=0 {
-        
-     _stub();
+      :"P0.new=cmp.eq("S4", "imm_8_12u"); if (P0.new) jump:t "CJ_R9 is imm_27=0 & imm_22_26=0b00000 & S4 & imm_13=1 & imm_8_12u & imm_0=0 & CJ_R9 {
+        if(S4 != imm_8_12u) goto <bad>;
+        P0.new = 0xff;
+	jump(CJ_R9);
+        goto <end>;
+        <bad>
+        P0.new = 0x0;
+	<end>
      }
 
      :"p0.new = cmp.eq(" S4 "," imm_8_12u "); if (!p0.new) jump:nt" CJ_R9 is CJ_R9 &     imm_27=0 & imm_22_26=0b00001 & imm_20_21 & S4 & imm_13=0 & imm_8_12u & imm_1_7 & imm_0=0 {
@@ -1888,21 +1908,41 @@ with slot: iclass=0b0101 {
      }
 
      #NP
-     :"cj16 "CJ_R9 is CJ_R9 &     imm_27=0 & imm_22_26=0b00010 & imm_20_21 & S4 & imm_13=0 & imm_8_12 & imm_1_7 & imm_0=0 {
-        
-     _stub();
+     :"p0.new = cmp.gt(" S4 "," imm_8_12u "); if (p0.new) jump:nt" CJ_R9 is CJ_R9 &     imm_27=0 & imm_22_26=0b00010 & imm_20_21 & S4 & imm_13=0 & imm_8_12u & imm_1_7 & imm_0=0 {
+        if(S4 <= imm_8_12u) goto <bad>;
+            P0.new = 0xff;
+            jump(CJ_R9);
+            goto <end>;
+        <bad>
+            P0.new = 0x0;
+        <end>
      }
-     :"cj17 "CJ_R9 is CJ_R9 &     imm_27=0 & imm_22_26=0b00010 & imm_20_21 & S4 & imm_13=1 & imm_8_12 & imm_1_7 & imm_0=0 {
-        
-     _stub();
+     :"p0.new = cmp.gt(" S4 "," imm_8_12u "); if (p0.new) jump:t" CJ_R9 is CJ_R9 &     imm_27=0 & imm_22_26=0b00010 & imm_20_21 & S4 & imm_13=1 & imm_8_12u & imm_1_7 & imm_0=0 {
+        if(S4 <= imm_8_12u) goto <bad>;
+            P0.new = 0xff;
+            jump(CJ_R9);
+            goto <end>;
+        <bad>
+            P0.new = 0x0;
+        <end>
      }
-     :"cj18 "CJ_R9 is CJ_R9 &     imm_27=0 & imm_22_26=0b00011 & imm_20_21 & S4 & imm_13=0 & imm_8_12 & imm_1_7 & imm_0=0 {
-        
-     _stub();
+     :"p0.new = cmp.gt(" S4 "," imm_8_12u "); if (!p0.new) jump:nt" CJ_R9 is CJ_R9 &     imm_27=0 & imm_22_26=0b00011 & imm_20_21 & S4 & imm_13=0 & imm_8_12u & imm_1_7 & imm_0=0 {
+        if(S4 <= imm_8_12u) goto <bad>;
+            P0.new = 0xff;
+            goto <end>;
+        <bad>
+            P0.new = 0x0;
+            jump(CJ_R9);
+        <end>
      }
-     :"cj19 "CJ_R9 is CJ_R9 &     imm_27=0 & imm_22_26=0b00011 & imm_20_21 & S4 & imm_13=1 & imm_8_12 & imm_1_7 & imm_0=0 {
-        
-     _stub();
+     :"p0.new = cmp.gt(" S4 "," imm_8_12u "); if (!p0.new) jump:t" CJ_R9 is CJ_R9 &     imm_27=0 & imm_22_26=0b00011 & imm_20_21 & S4 & imm_13=1 & imm_8_12u & imm_1_7 & imm_0=0 {
+        if(S4 <= imm_8_12u) goto <bad>;
+            P0.new = 0xff;
+            goto <end>;
+        <bad>
+            P0.new = 0x0;
+            jump(CJ_R9);
+        <end>
      }
      :"p0.new = cmp.gtu(" S4 "," imm_8_12u "); if (p0.new) jump:nt" CJ_R9 is CJ_R9 &     imm_27=0 & imm_22_26=0b00100 & imm_20_21 & S4 & imm_13=0 & imm_8_12u & imm_1_7 & imm_0=0 {
         if(S4 <= imm_8_12u) goto <bad>;
@@ -2307,8 +2347,9 @@ with slot: iclass=0b0011 {
     }
 }
 with slot: iclass=0b0100 {
-    :D5"=dword1" is imm_27=1 & imm_25_26 & imm_21_24=0b1110 & imm_16_20 & imm_5_13 & D5 {
-    	_stub();
+    :D5_pair "=memd(GP+" u16 ")" is imm_27=1 & imm_25_26u & imm_21_24=0b1110 & imm_16_20u & imm_5_13u & D5_pair [u16 = (imm_5_13u | (imm_16_20u << 9) | (imm_25_26u << 14)) << 3; ]{
+        local tmp2:4 = GP + u16;
+        D5_pair = *[ram]:8 tmp2;
     }
 }
 with slot: iclass=0b1001 {
@@ -2750,13 +2791,15 @@ with slot: iclass=0b1001 {
 
 #ld:load uhw
 with slot: iclass=0b0011 {
-    :D5"=memuh("S5"+"T5"#"u2")" is imm_21_27=0b1010011 & S5 & imm_13u & T5 & imm_7u & imm_5_6=0 & D5 [ u2 = (imm_7u) | (imm_13u << 1);]  {
-        _stub();
+    :D5"=memuh(" S5 "+" T5 "<<" u2")" is imm_21_27=0b1010011 & S5 & imm_13u & T5 & imm_7u & imm_5_6=0 & D5 [ u2 = (imm_7u) | (imm_13u << 1);]  {
+        local EA:4 = S5 + (T5  << u2);
+        D5 = *[ram]:2 EA;
     }
 }
 with slot: iclass=0b0100 {
     :D5"=memuh(gp+"u16")" is imm_27=1 & imm_25_26u & imm_21_24=0b1011 & imm_16_20u & imm_5_13u & D5  [u16 = (imm_5_13u) | (imm_16_20u << 9) | (imm_25_26u << 14);]{
-        _stub();
+        local EA:4 = GP + u16;
+        D5 = *[ram]:2 EA;
     }
 }
 with wslot: iclass64=0b0100 {
@@ -4876,8 +4919,8 @@ with slot: iclass=0b1110 {
 }
 # XTYPE/ALU:Add dword
 with slot: iclass=0b1101 {
-    :"=addd0" is imm_21_27=0b0011000 & S5 & imm_13=0 & T5 & imm_5_7=0b111 & D5 {
-    _stub();
+    :D5_pair "=add(" S5_pair "," T5_pair ")" is imm_21_27=0b0011000 & S5_pair & imm_13=0 & T5_pair & imm_5_7=0b111 & D5_pair {
+        D5_pair = S5_pair + T5_pair;
     }
     :"=addd1" is imm_21_27=0b0011011 & S5 & imm_13=0 & T5 & imm_5_7=0b101 & D5 {
     _stub();
@@ -5074,21 +5117,36 @@ with slot: iclass=0b1101 {
 
 # XTYPE/ALU:min word
 with slot: iclass=0b1101 {
-    :"minw0" is imm_21_27=0b0101101 & S5 & imm_13=0 & T5 & imm_7=0 & imm_5_6=0 & D5 {
-    _stub();
+    :D5 "=min(" T5 "," S5 ")" is imm_21_27=0b0101101 & S5 & imm_13=0 & T5 & imm_7=0 & imm_5_6=0 & D5 {
+        if (T5 < S5) goto <p2>;
+        D5 = S5;
+        goto <end>;
+        <p2>
+        D5 = T5;
+        <end>
     }
-    :"minw1" is imm_21_27=0b0101101 & S5 & imm_13=0 & T5 & imm_7=1 & imm_5_6=0 & D5 {
-    _stub();
+    :D5 "=minu(" T5 "," S5 ")" is imm_21_27=0b0101101 & S5 & imm_13=0 & T5 & imm_7=1 & imm_5_6=0 & D5 {
+        if (T5 s< S5) goto <p2>;
+        D5 = S5;
+        goto <end>;
+        <p2>
+        D5 = T5;
+        <end>
     }
 }
 
 # XTYPE/ALU:min dword
 with slot: iclass=0b1101 {
-    :"maxd0" is imm_21_27=0b0011101 & S5 & imm_13=0 & T5 & imm_5_7=0b110 & D5 {
+    :"mind0" is imm_21_27=0b0011101 & S5 & imm_13=0 & T5 & imm_5_7=0b110 & D5 {
     _stub();
     }
-    :"maxd1" is imm_21_27=0b0011101 & S5 & imm_13=0 & T5 & imm_5_7=0b111 & D5 {
-    _stub();
+    :D5_pair "=minu(" T5_pair "," S5_pair ")" is imm_21_27=0b0011101 & S5_pair & imm_13=0 & T5_pair & imm_5_7=0b111 & D5_pair {
+        if (T5_pair < S5_pair) goto <p2>;
+        D5_pair = S5_pair;
+        goto <end>;
+        <p2>
+        D5_pair = T5_pair;
+        <end>
     }
 }
 
@@ -5144,8 +5202,8 @@ with slot: iclass=0b1100 {
 
 # XTYPE/ALU:sub dword
 with slot: iclass=0b1101 {
-    :"subd" is imm_21_27=0b0011001 & S5 & imm_13=0 & T5 & imm_5_7=0b111 & D5 {
-    _stub();
+    :D5_pair "=sub(" T5_pair "," S5_pair ")" is imm_21_27=0b0011001 & S5_pair & imm_13=0 & T5_pair & imm_5_7=0b111 & D5_pair {
+        D5_pair = T5_pair - S5_pair;
     }
     :"subd" is imm_21_27=0b0101100 & S5 & imm_13=0 & T5 & imm_7=1 & imm_5_6=0 & D5 {
     _stub();
@@ -5575,8 +5633,9 @@ with slot: iclass=0b1000 {
     :D5"ins0" is imm_24_27=0b0011 & imm_21_23 & S5 & imm_8_13 & imm_5_7 & D5 {
 _stub();
     }
-    :D5"ins1" is imm_23_27=0b11110 & imm_21_22 & S5 & imm_13=0 & imm_8_12 & imm_5_7 & D5 {
-_stub();
+    :D5 "=insert(" S5 "," imm_8_12u "," U5 ")" is imm_23_27=0b11110 & imm_21_22u & S5 & imm_13=0 & imm_8_12u & imm_5_7u & D5 [ U5 = imm_5_7u | (imm_21_22u << 3); ] {
+        D5 = D5 & ~(((1 << imm_8_12u)-1) << U5);
+        D5 = D5 | ((S5 & ((1<<imm_8_12u)-1)) << U5);
     }
 }
 
@@ -7024,13 +7083,13 @@ with slot: iclass=0b1000 {
 # XTYPE/SHIFT:Shift by imm
 with slot: iclass=0b1000 {
     :D5_pair"=asr("S5_pair",#"imm_8_13")" is imm_21_27=0b0000000 & S5_pair & imm_8_13 & imm_5_7=0b000 & D5_pair {
-       _stub();
+        D5_pair = S5_pair s>> imm_8_13;
     }
     :D5_pair"=lsr("S5_pair",#"imm_8_13")" is imm_21_27=0b0000000 & S5_pair & imm_8_13 & imm_5_7=0b001 & D5_pair {
-       _stub();
+        D5_pair = S5_pair >> imm_8_13;
     }
     :D5_pair"=asl("S5_pair",#"imm_8_13")" is imm_21_27=0b0000000 & S5_pair & imm_8_13 & imm_5_7=0b010 & D5_pair {
-       _stub();
+        D5_pair = S5_pair << imm_8_13;
     }
     :D5_pair"=rol("S5_pair",#"imm_8_13")" is imm_21_27=0b0000000 & S5_pair & imm_8_13 & imm_5_7=0b011 & D5_pair {
        _stub();
