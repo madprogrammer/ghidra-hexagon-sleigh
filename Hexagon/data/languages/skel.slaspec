@@ -933,10 +933,10 @@ slot:D5" = add("S5","T5"):sat" is iclass=0b1111 & D5 & imm_21_27=0b0110010 & S5 
     _stub();
 }
 # const ext 
-wslot:"w add" is iclass64=0b1011 & S564 & D564 & imm64_21_27 & imm64_5_13
-{
-_stub();
-}
+#wslot:"w add" is iclass64=0b1011 & S564 & D564 & imm64_21_27 & imm64_5_13
+#{
+#_stub();
+#}
 
 # ALU32/ALU:logical
 with slot: iclass=0b0111 {
@@ -1040,10 +1040,10 @@ with slot: iclass=0b0111 {
 	}  
 }
 # Special case for constant extender
-wslot:"immext "D564"=#"v is immw_his & immw_lou & iclass64=0b0111 & Rs64=1 & MajOp64=0b000 & imm64_21=0 &  D564 & imm64_22_23u & imm64_16_20u & imm64_5_13u & imm64_5_10u [ v = (imm64_5_10u) | (immw_lou << 6) | (immw_his << 20); ]
-{
-    D564 = v:4;
-}
+#wslot:"immext "D564"=#"v is immw_his & immw_lou & iclass64=0b0111 & Rs64=1 & MajOp64=0b000 & imm64_21=0 &  D564 & imm64_22_23u & imm64_16_20u & imm64_5_13u & imm64_5_10u [ v = (imm64_5_10u) | (immw_lou << 6) | (immw_his << 20); ]
+#{
+#    D564 = v:4;
+#}
 
 # externder placeholder
 #wslot:"immextplace" is immw_hi & immw_lo & iclass64 & Rs64 & MajOp64 & imm64_21 &  D564 & imm64_22_23 & imm64_16_20 & imm64_5_13 {
@@ -1871,7 +1871,7 @@ with slot: iclass=0b0101 {
         export loc;
       }
 
-	 :"call "v is imm_25_27=0b101 &  imm_16_24 & imm_1_13u       & imm_0=0 [v = inst_start + (((imm_1_13u) | (imm_16_24 << 13)) << 2) ; ] {
+	 :^"call" v is imm_25_27=0b101 &  imm_16_24 & imm_1_13u       & imm_0=0 [v = inst_start + (((imm_1_13u) | (imm_16_24 << 13)) << 2) ;] {
         LR = inst_next;
 	call(v);
 	 }
@@ -2601,17 +2601,18 @@ with slot: iclass=0b0101 {
 # J/Jump to address
 with slot: iclass=0b0101 {
 
-    JImm: loc is imm_16_24 & imm_1_13u [loc = inst_start+(((imm_16_24 << 13) | (imm_1_13u)) << 2);]{
-    	local v:4 = loc;
-        export v;
-    }
+    #JImm: loc is imm_16_24 & imm_1_13u [loc = inst_start+(((imm_16_24 << 13) | (imm_1_13u)) << 2);]{
+    	#local v:4 = loc;
+        #export v;
+    #}
 
     :"jump "loc  is imm_25_27=0b100  &  imm_0=0 & imm_16_24 & imm_1_13u  [loc = inst_start+(((imm_16_24 << 13) | (imm_1_13u)) << 2);] {
     	jump(loc);
      }
     
     IfImm: r15 is imm_1_7u & imm_13u & imm_16_20u & imm_22_23 [r15 = inst_start + ((imm_1_7u | (imm_13u << 7) | (imm_16_20u << 8) | (imm_22_23 << 13)) << 2);] {
-        export r15;
+    	local v:4 = r15;
+        export v;
     }
 
 	 :"if ("U2") jump:nt" r15  is  imm_24_27=0b1100 & imm_21=0 & imm_11_12=0b00 & imm_10=0 & U2 & imm_0=0 & imm_1_7u & imm_13u & imm_16_20u & imm_22_23  [r15 = inst_start + ((imm_1_7u | (imm_13u << 7) | (imm_16_20u << 8) | (imm_22_23 << 13)) << 2);]{
@@ -2686,12 +2687,12 @@ with slot: iclass=0b0110 {
 	 }
 
 	 :"if("S5">=#0) jump:nt "Jmp_R13 is imm_22_27=0b000101 & Jmp_R13 & S5 & imm_12=0 & imm_0=0 {
-	 	if(S5 >= 0) goto <end>;
+	 	if(S5 s>= 0) goto <end>;
         jump(Jmp_R13);
         <end>
 	 }
 	 :"if("S5">=#0) jump:t "Jmp_R13 is imm_22_27=0b000101 & Jmp_R13 & S5 & imm_12=1 & imm_0=0 {
-	 	if(S5 >= 0) goto <end>;
+	 	if(S5 s>= 0) goto <end>;
         jump(Jmp_R13);
         <end>
 	 }
@@ -2706,12 +2707,12 @@ with slot: iclass=0b0110 {
         <end>
 	 }
 	 :"if("S5">=#0) jump:nt "Jmp_R13  is imm_22_27=0b000111 & Jmp_R13 & S5 & imm_12=0 & imm_0=0 {
-	 	if(S5 >= 0) goto <end>;
+	 	if(S5 s>= 0) goto <end>;
         jump(Jmp_R13);
         <end>
 	 }
 	 :"if("S5">=#0) jump:t "Jmp_R13  is imm_22_27=0b000111 & Jmp_R13 & S5 & imm_12=1 & imm_0=0 {
-	 	if(S5 >= 0) goto <end>;
+	 	if(S5 s>= 0) goto <end>;
         jump(Jmp_R13);
         <end>
 	 }
