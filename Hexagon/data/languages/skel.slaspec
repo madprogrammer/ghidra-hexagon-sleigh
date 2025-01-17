@@ -132,15 +132,6 @@ define token instr64 (64)
    iclassw = (28, 31)
 ;
 
-#define token instr13 (16)
-#
-#	immdup_13=(13,13)
-#	immdup_9_12=(9,12)
-#	immdup_5_8=(5,8)
-#	immdup_0_9=(0,9)
-#	immdup_0_4=(0,4)
-#	;
-
 define token instr (32)
    iclass     = (28,31)
 
@@ -460,14 +451,7 @@ has_ret_tgt
 
 define register offset=0x300 size=16 [ 
 testctx
-#testctx1
-#testctx2
 ];
-
-#define register offset=0x400 size=4 [ 
-#testctx4
-#];
-
 
 define context testctx
 	immext0 = (0, 31) noflow signed
@@ -477,8 +461,6 @@ define context testctx
 	# opaque pred for false
 	disabled = (80, 80) noflow
 ;	
-
-
 
 
 # high dword: Left
@@ -905,29 +887,42 @@ attach variables [ S6_svctrl ] [
  define pcodeop _stub;
 
 macro jump(dest) {
+	# must take the first jump that happens (8.7)
+	if(has_branch_tgt != 0) goto <nosetjmp>;
 	branch_tgt= dest;
 	has_branch_tgt = 1;
+	<nosetjmp>
 }
 macro call(dest) {
+	if(has_branch_tgt != 0) goto <nosetcall>;
 	call_tgt= dest;
 	has_call_tgt = 1;
+	<nosetcall>
 }
 macro return() {
+	if(has_ret_tgt != 0) goto <nosetret>;
 	ret_tgt = LR;
 	has_ret_tgt = 1;
+	<nosetret>
 }
 
  
 # ALU32/ALU:add
-slot:D5" = add("S5",#"loc")" is iclass=0b1011 & S5 & D5 & imm_21_27 & imm_5_13 [loc= ((imm_21_27 << 9) | (imm_5_13));] {
-    D5 = S5 + sext(loc:2);
-} 
-slot:D5" = add("S5","T5")" is iclass=0b1111 & D5 & imm_21_27=0b0011000 & S5 & imm_13=0 & T5 & imm_5_7=0 {
-    D5 = S5 + T5;
-} 
-slot:D5" = add("S5","T5"):sat" is iclass=0b1111 & D5 & imm_21_27=0b0110010 & S5 & imm_13=0 & T5 & imm_5_7=0 {
-    #D5 = S5 + T5;
-    _stub();
+with slot: {
+	:D5" = add("S5",#"loc")" is iclass=0b1011 & S5 & D5 & imm_21_27 & imm_5_13 [loc= ((imm_21_27 << 9) | (imm_5_13));] {
+	    D5 = S5 + sext(loc:2);
+	} 
+	:D5" = add("S5","T5")" is iclass=0b1111 & D5 & imm_21_27=0b0011000 & S5 & imm_13=0 & T5 & imm_5_7=0 {
+	    D5 = S5 + T5;
+	} 
+	:D5" = add("S5","T5"):sat" is iclass=0b1111 & D5 & imm_21_27=0b0110010 & S5 & imm_13=0 & T5 & imm_5_7=0 {
+	    D5 = S5 + T5;
+	    if (D5 < S5) goto <sat>;
+	    goto <end>;
+	    <sat>
+		D5 = -1;
+	    <end>
+	}
 }
 # const ext 
 #wslot:"w add" is iclass64=0b1011 & S564 & D564 & imm64_21_27 & imm64_5_13
@@ -987,13 +982,17 @@ with slot: iclass=0b0111 {
 	} 
 }
 with slot: iclass=0b1111 {
-	slot:D5" = sub("T5","S5")" is imm_21_27=0b0011001 & S5 & imm_13=0 & T5 & imm_5_7=0 & D5 {
+	:D5" = sub("T5","S5")" is imm_21_27=0b0011001 & S5 & imm_13=0 & T5 & imm_5_7=0 & D5 {
 	    D5 = T5 - S5;
 	} 
 
-	slot:D5" = sub("T5","S5"):sat" is imm_21_27=0b0110110 & S5 & imm_13=0 & T5 & imm_5_7=0 & D5 {
-		_stub();
-	    #D5 = T5 - S5;
+	:D5" = sub("T5","S5"):sat" is imm_21_27=0b0110110 & S5 & imm_13=0 & T5 & imm_5_7=0 & D5 {
+	    D5 = S5 - T5;
+	    if (D5 > S5) goto <sat>;
+	    goto <end>;
+	    <sat>
+		D5 = 0;
+	    <end>
 	} 
 }
 
@@ -1001,10 +1000,10 @@ with slot: iclass=0b1111 {
 # ALU32/ALU:sext
 with slot: iclass=0b0111 {
 	:D5 "=sxtb(" S5 ")" is imm_21_27=0b0000101 & S5 & imm_13=0 & imm_5_12=0 & D5 {
-        D5 = sext(S5:1);
+		D5 = sext(S5:1);
 	} 
 	:D5 "=sxth(" S5 ")" is imm_21_27=0b0000111 & S5 & imm_13=0 & imm_5_12=0 & D5 {
-        D5 = sext(S5:2);
+		D5 = sext(S5:2);
 	} 
 }
 
@@ -1056,7 +1055,7 @@ with slot: iclass=0b0111 {
 # ALU32/ALU:trans_reg
  with slot: iclass=0b0111 {
 	:D5"="S5 is Rs = 0 & MajOp = 0b000 & MinOp=0b011 & S5 & imm_13=0 & imm_5_12=0 & D5 {
-        D5 = S5;
+		D5 = S5;
 	}
 }
 
@@ -1103,18 +1102,25 @@ with slot: iclass=0b1111 {
 # ALU32/ALU:zext
  with slot: iclass=0b0111 {
 	:D5 "=zxth(" S5 ")" is imm_21_27=0b0000110 & S5 & imm_13=0 & imm_5_12=0 & D5 {
-        D5 = zext(S5:2);
+		D5 = zext(S5:2);
 	}
 }
 
 # ALU32/PERM:Combine words
 with slot: iclass=0b0111 {
-    :D5_pair"=combine("S5","imm_5_12")" is Rs=0 & MajOp=0b011 & imm_23=0 & imm_21_22=0b00 & S5 & imm_13=1 & imm_5_12 & D5_pair {
+    :D5_pair"=combine("S5","imm_5_12")" is Rs=0 & MajOp=0b011 & imm_23=0 & imm_21_22=0b00 & S5 & imm_13=1 & imm_5_12 & D5_pair & hasext0=0 {
         local tmp1:4 = imm_5_12;
         local tmp2:8 = zext(tmp1);
         local tmp3:8 = zext(S5);
         D5_pair = (tmp3 << 32) | tmp2;
     }
+    :D5_pair"=combine("S5","v")" is Rs=0 & MajOp=0b011 & imm_23=0 & imm_21_22=0b00 & S5 & imm_13=1 & imm_5_12 & D5_pair & hasext0=1 & hasext1=0 & imm_5_10u [v = imm_5_10u | immext0;]  {
+        local tmp1:4 = v;
+        local tmp2:8 = zext(tmp1);
+        local tmp3:8 = zext(S5);
+        D5_pair = (tmp3 << 32) | tmp2;
+    }
+
     :D5_pair"=combine("imm_5_12","S5")" is Rs=0 & MajOp=0b011 & imm_23=0 & imm_21_22=0b01 & S5 & imm_13=1 & imm_5_12 & D5_pair {
         local tmp1:4 = imm_5_12;
         local tmp2:8 = zext(tmp1);
@@ -1143,11 +1149,11 @@ with slot: iclass=0b0111 {
         D5_pair = (tmp1<<32)|tmp3;
     }
 }
-with wslot: iclass64=0b0111 {
-    :"immext "D564_pair"=combine("S564","imm64_5_12")" is Rs64=0 & MajOp64=0b011 & imm64_23=0 & imm64_21_22=0b00 & S564 & imm64_13=1 & imm64_5_12 & D564_pair & immw_his & immw_lou{
-	_stub();
-    }
-}
+#with wslot: iclass64=0b0111 {
+    #:"immext "D564_pair"=combine("S564","imm64_5_12")" is Rs64=0 & MajOp64=0b011 & imm64_23=0 & imm64_21_22=0b00 & S564 & imm64_13=1 & imm64_5_12 & D564_pair & immw_his & immw_lou{
+	#_stub();
+    #}
+#}
 with slot: iclass=0b1111 {
     :="comb4(" is Rs=0 & MajOp=0b011 & MinOp=0b100 & S5 & imm_13 & T5 & imm_5_7=0 & D5 {
         _stub();
@@ -1241,42 +1247,76 @@ with slot: iclass=0b1111 {
 
 # ALU32/PRED:Compare add
 with slot: iclass=0b0111 {
-    :"if ("U2_pred_21_22") "D5"=add("S5","imm_5_12")" is Rs=0 & MajOp=0b100 & imm_23=0 & U2_pred_21_22 & S5 & imm_13=0 & imm_5_12 & D5 {
-        if(U2_pred_21_22 == 0) goto <end>;
-	D5 = S5 + imm_5_12;
-        <end>
-    	
-    }
-    :"if ("U2_pred_new_21_22") "D5"=add("S5","imm_5_12")" is Rs=0 & MajOp=0b100 & imm_23=0 & U2_pred_new_21_22 & S5 & imm_13=1 & imm_5_12 & D5 {
-        if(U2_pred_new_21_22 == 0) goto <end>;
-	D5 = S5 + imm_5_12;
-        <end>
-    }
-    :"if (!"U2_pred_21_22") "D5"=add("S5","imm_5_12")" is Rs=0 & MajOp=0b100 & imm_23=1 & U2_pred_21_22 & S5 & imm_13=0 & imm_5_12 & D5 {
-        if(U2_pred_21_22 != 0) goto <end>;
-	D5 = S5 + imm_5_12;
-        <end>
-    }
-    :"if (!"U2_pred_new_21_22") "D5"=add("S5","imm_5_12")" is Rs=0 & MajOp=0b100 & imm_23=1 & U2_pred_new_21_22 & S5 & imm_13=1 & imm_5_12 & D5 {
-        if(U2_pred_new_21_22 != 0) goto <end>;
-	D5 = S5 + imm_5_12;
-        <end>
-    }
+	with : hasext0 = 0 {
+	    :"if ("U2_pred_21_22") "D5"=add("S5","imm_5_12")" is Rs=0 & MajOp=0b100 & imm_23=0 & U2_pred_21_22 & S5 & imm_13=0 & imm_5_12 & D5 {
+		if(U2_pred_21_22 == 0) goto <end>;
+		D5 = S5 + imm_5_12;
+		<end>
+		
+	    }
+	    :"if ("U2_pred_new_21_22") "D5"=add("S5","imm_5_12")" is Rs=0 & MajOp=0b100 & imm_23=0 & U2_pred_new_21_22 & S5 & imm_13=1 & imm_5_12 & D5 {
+		if(U2_pred_new_21_22 == 0) goto <end>;
+		D5 = S5 + imm_5_12;
+		<end>
+	    }
+	    :"if (!"U2_pred_21_22") "D5"=add("S5","imm_5_12")" is Rs=0 & MajOp=0b100 & imm_23=1 & U2_pred_21_22 & S5 & imm_13=0 & imm_5_12 & D5 {
+		if(U2_pred_21_22 != 0) goto <end>;
+		D5 = S5 + imm_5_12;
+		<end>
+	    }
+	    :"if (!"U2_pred_new_21_22") "D5"=add("S5","imm_5_12")" is Rs=0 & MajOp=0b100 & imm_23=1 & U2_pred_new_21_22 & S5 & imm_13=1 & imm_5_12 & D5 {
+		if(U2_pred_new_21_22 != 0) goto <end>;
+		D5 = S5 + imm_5_12;
+		<end>
+	    }
+	}
+	with : hasext0 = 1 & hasext1 = 0{
+	    :"if ("U2_pred_21_22") "D5"=add("S5","v")" is Rs=0 & MajOp=0b100 & imm_23=0 & U2_pred_21_22 & S5 & imm_13=0 & imm_5_12 & D5 & immext0 & imm_5_10u [ v = imm_5_10u | immext0;] {
+		if(U2_pred_21_22 == 0) goto <end>;
+		D5 = S5 + v;
+		<end>
+		
+	    }
+	    :"if ("U2_pred_new_21_22") "D5"=add("S5","v")" is Rs=0 & MajOp=0b100 & imm_23=0 & U2_pred_new_21_22 & S5 & imm_13=1 & imm_5_12 & D5 & immext0 & imm_5_10u [ v = imm_5_10u | immext0;]{
+		if(U2_pred_new_21_22 == 0) goto <end>;
+		D5 = S5 + v;
+		<end>
+	    }
+	    :"if (!"U2_pred_21_22") "D5"=add("S5","v")" is Rs=0 & MajOp=0b100 & imm_23=1 & U2_pred_21_22 & S5 & imm_13=0 & imm_5_12 & D5 & immext0 & imm_5_10u [ v = imm_5_10u | immext0;]{
+		if(U2_pred_21_22 != 0) goto <end>;
+		D5 = S5 + v;
+		<end>
+	    }
+	    :"if (!"U2_pred_new_21_22") "D5"=add("S5","v")" is Rs=0 & MajOp=0b100 & imm_23=1 & U2_pred_new_21_22 & S5 & imm_13=1 & imm_5_12 & D5 & immext0 & imm_5_10u [ v = imm_5_10u | immext0;]{
+		if(U2_pred_new_21_22 != 0) goto <end>;
+		D5 = S5 + v;
+		<end>
+	    }
+	}
 }
 with slot: iclass=0b1111 {
-    :="cadd4(" is Rs=1 & MajOp=0b011 & imm_23=0 & imm_21=0 & imm_21=0 & S5 & imm_13=0 & T5 & imm_7=0 & imm_5_6 & D5 {
-        _stub();
+    :"if(" U2_5_6 ") " D5 "=add(" S5 "," T5 ")" is Rs=1 & MajOp=0b011 & imm_23=0 & imm_21=0 & imm_21=0 & S5 & imm_13=0 & T5 & imm_7=0 & U2_5_6 & D5 {
+		if(U2_5_6 == 0) goto <end>;
+		D5 = S5 + T5;
+		<end>
     }
-    :="cadd5(" is Rs=1 & MajOp=0b011 & imm_23=0 & imm_21=0 & imm_21=0 & S5 & imm_13=0 & T5 & imm_7=1 & imm_5_6 & D5 {
-        _stub();
+    :"if(!" U2_5_6 ") " D5 "=add(" S5 "," T5 ")" is Rs=1 & MajOp=0b011 & imm_23=0 & imm_21=0 & imm_21=0 & S5 & imm_13=0 & T5 & imm_7=1 & U2_5_6 & D5 {
+		if(U2_5_6 != 0) goto <end>;
+		D5 = S5 + T5;
+		<end>
     }
-    :="cadd6(" is Rs=1 & MajOp=0b011 & imm_23=0 & imm_21=0 & imm_21=0 & S5 & imm_13=1 & T5 & imm_7=0 & imm_5_6 & D5 {
-        _stub();
-    } 
-    :="cadd7(" is Rs=1 & MajOp=0b011 & imm_23=0 & imm_21=0 & imm_21=0 & S5 & imm_13=1 & T5 & imm_7=1 & imm_5_6 & D5 {
-        _stub();
-    } 
+    :"if(" U2_5_6_pred_new ") " D5 "=add(" S5 "," T5 ")" is Rs=1 & MajOp=0b011 & imm_23=0 & imm_21=0 & imm_21=0 & S5 & imm_13=1 & T5 & imm_7=0 & U2_5_6_pred_new & D5 {
+		if(U2_5_6_pred_new == 0) goto <end>;
+		D5 = S5 + T5;
+		<end>
+    }
+    :"if(!" U2_5_6_pred_new ") " D5 "=add(" S5 "," T5 ")" is Rs=1 & MajOp=0b011 & imm_23=0 & imm_21=0 & imm_21=0 & S5 & imm_13=1 & T5 & imm_7=1 & U2_5_6_pred_new & D5 {
+		if(U2_5_6_pred_new != 0) goto <end>;
+		D5 = S5 + T5;
+		<end>
+    }
 }
+
 # ALU32/PRED:Cond shift hw
 with slot: iclass=0b0111 {
     :D5="cshw0(" is Rs=0 & MajOp=0b000 & MinOp=0b000 & S5 & imm_13=1 & imm_0_12 & imm_10_11=0b00 & imm_8_9 & imm_5_7=0 & D5 {
@@ -4477,8 +4517,9 @@ with slot: iclass=0b1010 {
 
 # ST:Store HW 
 with slot: iclass=0b0011 {
-    :"memh0" is imm_21_27=0b1011010 & S5 & imm_13 & T5 & imm_7 & imm_5_6=0 & D5 {
-        _stub();
+    :"memh(" S5 "+" T5 "<<" u2 ")=" D5 is imm_21_27=0b1011010 & S5 & imm_13u & T5 & imm_7u & imm_5_6=0 & D5 [u2 = imm_7u | (imm_13u << 2); ]  {
+    	local EA:4 = (S5 + T5) << u2;
+    	*[ram]:2 EA = D5;
     }
     :"memh1" is imm_21_27=0b1011011 & S5 & imm_13 & T5 & imm_7 & imm_5_6=0 & D5 {
         _stub();
@@ -5459,8 +5500,9 @@ with slot: iclass=0b1101 {
 
 # XTYPE/ALU:Add hword
 with slot: iclass=0b1101 {
-    :"=addhw00" is imm_21_27=0b0101000 & S5 & imm_13=0 & T5 & imm_6_7=0b00 & imm_5=0 & D5 {
-    _stub();
+    :D5 "=add(" T5^".L" "," S5^".L" ")" is imm_21_27=0b0101000 & S5 & imm_13=0 & T5 & imm_6_7=0b00 & imm_5=0 & D5 {
+    local E:2 = T5:2 + S5:2;
+    D5 = sext(E);
     }
     :"=addhw01" is imm_21_27=0b0101000 & S5 & imm_13=0 & T5 & imm_6_7=0b01 & imm_5=0 & D5 {
     _stub();
